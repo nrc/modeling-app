@@ -642,46 +642,46 @@ snapshot_kind: text
       "value": "radius"
     },
     {
-      "type": "colon",
+      "type": "whitespace",
       "start": 215,
       "end": 216,
-      "value": ":"
+      "value": " "
+    },
+    {
+      "type": "operator",
+      "start": 216,
+      "end": 217,
+      "value": "="
     },
     {
       "type": "whitespace",
-      "start": 216,
-      "end": 217,
+      "start": 217,
+      "end": 218,
       "value": " "
     },
     {
       "type": "number",
-      "start": 217,
-      "end": 218,
+      "start": 218,
+      "end": 219,
       "value": "2"
     },
     {
       "type": "comma",
-      "start": 218,
-      "end": 219,
+      "start": 219,
+      "end": 220,
       "value": ","
     },
     {
       "type": "whitespace",
-      "start": 219,
-      "end": 227,
+      "start": 220,
+      "end": 228,
       "value": "\n       "
     },
     {
       "type": "word",
-      "start": 227,
-      "end": 231,
-      "value": "tags"
-    },
-    {
-      "type": "colon",
-      "start": 231,
+      "start": 228,
       "end": 232,
-      "value": ":"
+      "value": "tags"
     },
     {
       "type": "whitespace",
@@ -690,99 +690,111 @@ snapshot_kind: text
       "value": " "
     },
     {
-      "type": "brace",
+      "type": "operator",
       "start": 233,
       "end": 234,
+      "value": "="
+    },
+    {
+      "type": "whitespace",
+      "start": 234,
+      "end": 235,
+      "value": " "
+    },
+    {
+      "type": "brace",
+      "start": 235,
+      "end": 236,
       "value": "["
     },
     {
       "type": "word",
-      "start": 234,
-      "end": 240,
+      "start": 236,
+      "end": 242,
       "value": "thing3"
     },
     {
       "type": "comma",
-      "start": 240,
-      "end": 241,
+      "start": 242,
+      "end": 243,
       "value": ","
     },
     {
       "type": "whitespace",
-      "start": 241,
-      "end": 242,
+      "start": 243,
+      "end": 244,
       "value": " "
     },
     {
       "type": "word",
-      "start": 242,
-      "end": 257,
+      "start": 244,
+      "end": 259,
       "value": "getOppositeEdge"
     },
     {
       "type": "brace",
-      "start": 257,
-      "end": 258,
+      "start": 259,
+      "end": 260,
       "value": "("
     },
     {
       "type": "word",
-      "start": 258,
-      "end": 264,
+      "start": 260,
+      "end": 266,
       "value": "thing3"
     },
     {
       "type": "brace",
-      "start": 264,
-      "end": 265,
+      "start": 266,
+      "end": 267,
       "value": ")"
     },
     {
       "type": "brace",
-      "start": 265,
-      "end": 266,
+      "start": 267,
+      "end": 268,
       "value": "]"
     },
     {
       "type": "whitespace",
-      "start": 266,
-      "end": 272,
+      "start": 268,
+      "end": 274,
       "value": "\n     "
     },
     {
       "type": "brace",
-      "start": 272,
-      "end": 273,
+      "start": 274,
+      "end": 275,
       "value": "}"
     },
     {
       "type": "comma",
-      "start": 273,
-      "end": 274,
+      "start": 275,
+      "end": 276,
       "value": ","
     },
     {
       "type": "whitespace",
-      "start": 274,
-      "end": 275,
+      "start": 276,
+      "end": 277,
       "value": " "
     },
     {
       "type": "operator",
-      "start": 275,
-      "end": 276,
+      "start": 277,
+      "end": 278,
       "value": "%"
     },
     {
       "type": "brace",
-      "start": 276,
-      "end": 277,
+      "start": 278,
+      "end": 279,
       "value": ")"
     },
     {
       "type": "whitespace",
-      "start": 277,
-      "end": 278,
+      "start": 279,
+      "end": 280,
       "value": "\n"
     }
   ]

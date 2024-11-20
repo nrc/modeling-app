@@ -852,76 +852,76 @@ snapshot_kind: text
       "value": "center"
     },
     {
-      "type": "colon",
+      "type": "whitespace",
       "start": 304,
       "end": 305,
-      "value": ":"
+      "value": " "
+    },
+    {
+      "type": "operator",
+      "start": 305,
+      "end": 306,
+      "value": "="
     },
     {
       "type": "whitespace",
-      "start": 305,
-      "end": 306,
+      "start": 306,
+      "end": 307,
       "value": " "
     },
     {
       "type": "brace",
-      "start": 306,
-      "end": 307,
+      "start": 307,
+      "end": 308,
       "value": "["
     },
     {
       "type": "number",
-      "start": 307,
-      "end": 308,
+      "start": 308,
+      "end": 309,
       "value": "0"
     },
     {
       "type": "comma",
-      "start": 308,
-      "end": 309,
+      "start": 309,
+      "end": 310,
       "value": ","
     },
     {
       "type": "whitespace",
-      "start": 309,
-      "end": 310,
+      "start": 310,
+      "end": 311,
       "value": " "
     },
     {
       "type": "number",
-      "start": 310,
-      "end": 311,
+      "start": 311,
+      "end": 312,
       "value": "0"
     },
     {
       "type": "brace",
-      "start": 311,
-      "end": 312,
+      "start": 312,
+      "end": 313,
       "value": "]"
     },
     {
       "type": "comma",
-      "start": 312,
-      "end": 313,
+      "start": 313,
+      "end": 314,
       "value": ","
     },
     {
       "type": "whitespace",
-      "start": 313,
-      "end": 314,
+      "start": 314,
+      "end": 315,
       "value": " "
     },
     {
       "type": "word",
-      "start": 314,
-      "end": 320,
-      "value": "radius"
-    },
-    {
-      "type": "colon",
-      "start": 320,
+      "start": 315,
       "end": 321,
-      "value": ":"
+      "value": "radius"
     },
     {
       "type": "whitespace",
@@ -930,10 +930,10 @@ snapshot_kind: text
       "value": " "
     },
     {
-      "type": "number",
+      "type": "operator",
       "start": 322,
       "end": 323,
-      "value": "5"
+      "value": "="
     },
     {
       "type": "whitespace",
@@ -942,123 +942,135 @@ snapshot_kind: text
       "value": " "
     },
     {
-      "type": "brace",
+      "type": "number",
       "start": 324,
       "end": 325,
+      "value": "5"
+    },
+    {
+      "type": "whitespace",
+      "start": 325,
+      "end": 326,
+      "value": " "
+    },
+    {
+      "type": "brace",
+      "start": 326,
+      "end": 327,
       "value": "}"
     },
     {
       "type": "comma",
-      "start": 325,
-      "end": 326,
+      "start": 327,
+      "end": 328,
       "value": ","
     },
     {
       "type": "whitespace",
-      "start": 326,
-      "end": 327,
+      "start": 328,
+      "end": 329,
       "value": " "
     },
     {
       "type": "operator",
-      "start": 327,
-      "end": 328,
+      "start": 329,
+      "end": 330,
       "value": "%"
     },
     {
       "type": "comma",
-      "start": 328,
-      "end": 329,
+      "start": 330,
+      "end": 331,
       "value": ","
     },
     {
       "type": "whitespace",
-      "start": 329,
-      "end": 330,
+      "start": 331,
+      "end": 332,
       "value": " "
     },
     {
       "type": "dollar",
-      "start": 330,
-      "end": 331,
+      "start": 332,
+      "end": 333,
       "value": "$"
     },
     {
       "type": "word",
-      "start": 331,
-      "end": 339,
+      "start": 333,
+      "end": 341,
       "value": "myCircle"
     },
     {
       "type": "brace",
-      "start": 339,
-      "end": 340,
+      "start": 341,
+      "end": 342,
       "value": ")"
     },
     {
       "type": "whitespace",
-      "start": 340,
-      "end": 343,
+      "start": 342,
+      "end": 345,
       "value": "\n  "
     },
     {
       "type": "operator",
-      "start": 343,
-      "end": 345,
+      "start": 345,
+      "end": 347,
       "value": "|>"
     },
     {
       "type": "whitespace",
-      "start": 345,
-      "end": 346,
+      "start": 347,
+      "end": 348,
       "value": " "
     },
     {
       "type": "word",
-      "start": 346,
-      "end": 353,
+      "start": 348,
+      "end": 355,
       "value": "extrude"
     },
     {
       "type": "brace",
-      "start": 353,
-      "end": 354,
+      "start": 355,
+      "end": 356,
       "value": "("
     },
     {
       "type": "number",
-      "start": 354,
-      "end": 355,
+      "start": 356,
+      "end": 357,
       "value": "5"
     },
     {
       "type": "comma",
-      "start": 355,
-      "end": 356,
+      "start": 357,
+      "end": 358,
       "value": ","
     },
     {
       "type": "whitespace",
-      "start": 356,
-      "end": 357,
+      "start": 358,
+      "end": 359,
       "value": " "
     },
     {
       "type": "operator",
-      "start": 357,
-      "end": 358,
+      "start": 359,
+      "end": 360,
       "value": "%"
     },
     {
       "type": "brace",
-      "start": 358,
-      "end": 359,
+      "start": 360,
+      "end": 361,
       "value": ")"
     },
     {
       "type": "whitespace",
-      "start": 359,
-      "end": 360,
+      "start": 361,
+      "end": 362,
       "value": "\n"
     }
   ]

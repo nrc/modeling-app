@@ -372,46 +372,46 @@ snapshot_kind: text
       "value": "foo"
     },
     {
-      "type": "colon",
+      "type": "whitespace",
       "start": 138,
       "end": 139,
-      "value": ":"
+      "value": " "
+    },
+    {
+      "type": "operator",
+      "start": 139,
+      "end": 140,
+      "value": "="
     },
     {
       "type": "whitespace",
-      "start": 139,
-      "end": 140,
+      "start": 140,
+      "end": 141,
       "value": " "
     },
     {
       "type": "number",
-      "start": 140,
-      "end": 141,
+      "start": 141,
+      "end": 142,
       "value": "1"
     },
     {
       "type": "comma",
-      "start": 141,
-      "end": 142,
+      "start": 142,
+      "end": 143,
       "value": ","
     },
     {
       "type": "whitespace",
-      "start": 142,
-      "end": 143,
+      "start": 143,
+      "end": 144,
       "value": " "
     },
     {
       "type": "word",
-      "start": 143,
-      "end": 146,
-      "value": "bar"
-    },
-    {
-      "type": "colon",
-      "start": 146,
+      "start": 144,
       "end": 147,
-      "value": ":"
+      "value": "bar"
     },
     {
       "type": "whitespace",
@@ -420,10 +420,10 @@ snapshot_kind: text
       "value": " "
     },
     {
-      "type": "number",
+      "type": "operator",
       "start": 148,
       "end": 149,
-      "value": "0"
+      "value": "="
     },
     {
       "type": "whitespace",
@@ -432,34 +432,34 @@ snapshot_kind: text
       "value": " "
     },
     {
-      "type": "brace",
+      "type": "number",
       "start": 150,
       "end": 151,
-      "value": "}"
+      "value": "0"
     },
     {
       "type": "whitespace",
       "start": 151,
       "end": 152,
+      "value": " "
+    },
+    {
+      "type": "brace",
+      "start": 152,
+      "end": 153,
+      "value": "}"
+    },
+    {
+      "type": "whitespace",
+      "start": 153,
+      "end": 154,
       "value": "\n"
     },
     {
       "type": "word",
-      "start": 152,
-      "end": 155,
-      "value": "one"
-    },
-    {
-      "type": "whitespace",
-      "start": 155,
-      "end": 156,
-      "value": " "
-    },
-    {
-      "type": "operator",
-      "start": 156,
+      "start": 154,
       "end": 157,
-      "value": "="
+      "value": "one"
     },
     {
       "type": "whitespace",
@@ -468,117 +468,129 @@ snapshot_kind: text
       "value": " "
     },
     {
-      "type": "word",
+      "type": "operator",
       "start": 158,
-      "end": 161,
-      "value": "obj"
+      "end": 159,
+      "value": "="
     },
     {
-      "type": "brace",
-      "start": 161,
-      "end": 162,
-      "value": "["
+      "type": "whitespace",
+      "start": 159,
+      "end": 160,
+      "value": " "
     },
     {
       "type": "word",
-      "start": 162,
+      "start": 160,
       "end": 163,
-      "value": "p"
+      "value": "obj"
     },
     {
       "type": "brace",
       "start": 163,
       "end": 164,
+      "value": "["
+    },
+    {
+      "type": "word",
+      "start": 164,
+      "end": 165,
+      "value": "p"
+    },
+    {
+      "type": "brace",
+      "start": 165,
+      "end": 166,
       "value": "]"
     },
     {
       "type": "whitespace",
-      "start": 164,
-      "end": 166,
+      "start": 166,
+      "end": 168,
       "value": "\n\n"
     },
     {
       "type": "word",
-      "start": 166,
-      "end": 177,
+      "start": 168,
+      "end": 179,
       "value": "assertEqual"
     },
     {
       "type": "brace",
-      "start": 177,
-      "end": 178,
+      "start": 179,
+      "end": 180,
       "value": "("
     },
     {
       "type": "word",
-      "start": 178,
-      "end": 181,
+      "start": 180,
+      "end": 183,
       "value": "one"
     },
     {
       "type": "comma",
-      "start": 181,
-      "end": 182,
+      "start": 183,
+      "end": 184,
       "value": ","
     },
     {
       "type": "whitespace",
-      "start": 182,
-      "end": 183,
+      "start": 184,
+      "end": 185,
       "value": " "
     },
     {
       "type": "number",
-      "start": 183,
-      "end": 184,
+      "start": 185,
+      "end": 186,
       "value": "1"
     },
     {
       "type": "comma",
-      "start": 184,
-      "end": 185,
+      "start": 186,
+      "end": 187,
       "value": ","
     },
     {
       "type": "whitespace",
-      "start": 185,
-      "end": 186,
+      "start": 187,
+      "end": 188,
       "value": " "
     },
     {
       "type": "number",
-      "start": 186,
-      "end": 195,
+      "start": 188,
+      "end": 197,
       "value": "0.0000001"
     },
     {
       "type": "comma",
-      "start": 195,
-      "end": 196,
+      "start": 197,
+      "end": 198,
       "value": ","
     },
     {
       "type": "whitespace",
-      "start": 196,
-      "end": 197,
+      "start": 198,
+      "end": 199,
       "value": " "
     },
     {
       "type": "string",
-      "start": 197,
-      "end": 203,
+      "start": 199,
+      "end": 205,
       "value": "\"oops\""
     },
     {
       "type": "brace",
-      "start": 203,
-      "end": 204,
+      "start": 205,
+      "end": 206,
       "value": ")"
     },
     {
       "type": "whitespace",
-      "start": 204,
-      "end": 205,
+      "start": 206,
+      "end": 207,
       "value": "\n"
     }
   ]

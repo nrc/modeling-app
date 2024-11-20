@@ -102,76 +102,76 @@ snapshot_kind: text
       "value": "center"
     },
     {
-      "type": "colon",
+      "type": "whitespace",
       "start": 50,
       "end": 51,
-      "value": ":"
+      "value": " "
+    },
+    {
+      "type": "operator",
+      "start": 51,
+      "end": 52,
+      "value": "="
     },
     {
       "type": "whitespace",
-      "start": 51,
-      "end": 52,
+      "start": 52,
+      "end": 53,
       "value": " "
     },
     {
       "type": "brace",
-      "start": 52,
-      "end": 53,
+      "start": 53,
+      "end": 54,
       "value": "["
     },
     {
       "type": "number",
-      "start": 53,
-      "end": 54,
+      "start": 54,
+      "end": 55,
       "value": "5"
     },
     {
       "type": "comma",
-      "start": 54,
-      "end": 55,
+      "start": 55,
+      "end": 56,
       "value": ","
     },
     {
       "type": "whitespace",
-      "start": 55,
-      "end": 56,
+      "start": 56,
+      "end": 57,
       "value": " "
     },
     {
       "type": "number",
-      "start": 56,
-      "end": 57,
+      "start": 57,
+      "end": 58,
       "value": "5"
     },
     {
       "type": "brace",
-      "start": 57,
-      "end": 58,
+      "start": 58,
+      "end": 59,
       "value": "]"
     },
     {
       "type": "comma",
-      "start": 58,
-      "end": 59,
+      "start": 59,
+      "end": 60,
       "value": ","
     },
     {
       "type": "whitespace",
-      "start": 59,
-      "end": 60,
+      "start": 60,
+      "end": 61,
       "value": " "
     },
     {
       "type": "word",
-      "start": 60,
-      "end": 66,
-      "value": "radius"
-    },
-    {
-      "type": "colon",
-      "start": 66,
+      "start": 61,
       "end": 67,
-      "value": ":"
+      "value": "radius"
     },
     {
       "type": "whitespace",
@@ -180,285 +180,315 @@ snapshot_kind: text
       "value": " "
     },
     {
-      "type": "number",
+      "type": "operator",
       "start": 68,
+      "end": 69,
+      "value": "="
+    },
+    {
+      "type": "whitespace",
+      "start": 69,
       "end": 70,
+      "value": " "
+    },
+    {
+      "type": "number",
+      "start": 70,
+      "end": 72,
       "value": "10"
     },
     {
       "type": "whitespace",
-      "start": 70,
-      "end": 71,
+      "start": 72,
+      "end": 73,
       "value": " "
     },
     {
       "type": "brace",
-      "start": 71,
-      "end": 72,
+      "start": 73,
+      "end": 74,
       "value": "}"
     },
     {
       "type": "comma",
-      "start": 72,
-      "end": 73,
+      "start": 74,
+      "end": 75,
       "value": ","
     },
     {
       "type": "whitespace",
-      "start": 73,
-      "end": 74,
+      "start": 75,
+      "end": 76,
       "value": " "
     },
     {
       "type": "operator",
-      "start": 74,
-      "end": 75,
+      "start": 76,
+      "end": 77,
       "value": "%"
     },
     {
       "type": "brace",
-      "start": 75,
-      "end": 76,
+      "start": 77,
+      "end": 78,
       "value": ")"
     },
     {
       "type": "whitespace",
-      "start": 76,
-      "end": 79,
+      "start": 78,
+      "end": 81,
       "value": "\n  "
     },
     {
       "type": "operator",
-      "start": 79,
-      "end": 81,
+      "start": 81,
+      "end": 83,
       "value": "|>"
     },
     {
       "type": "whitespace",
-      "start": 81,
-      "end": 82,
+      "start": 83,
+      "end": 84,
       "value": " "
     },
     {
       "type": "word",
-      "start": 82,
-      "end": 89,
+      "start": 84,
+      "end": 91,
       "value": "extrude"
     },
     {
       "type": "brace",
-      "start": 89,
-      "end": 90,
+      "start": 91,
+      "end": 92,
       "value": "("
     },
     {
       "type": "number",
-      "start": 90,
-      "end": 92,
+      "start": 92,
+      "end": 94,
       "value": "10"
     },
     {
       "type": "comma",
-      "start": 92,
-      "end": 93,
+      "start": 94,
+      "end": 95,
       "value": ","
     },
     {
       "type": "whitespace",
-      "start": 93,
-      "end": 94,
+      "start": 95,
+      "end": 96,
       "value": " "
     },
     {
       "type": "operator",
-      "start": 94,
-      "end": 95,
+      "start": 96,
+      "end": 97,
       "value": "%"
     },
     {
       "type": "brace",
-      "start": 95,
-      "end": 96,
+      "start": 97,
+      "end": 98,
       "value": ")"
     },
     {
       "type": "whitespace",
-      "start": 96,
-      "end": 99,
+      "start": 98,
+      "end": 101,
       "value": "\n  "
     },
     {
       "type": "operator",
-      "start": 99,
-      "end": 101,
+      "start": 101,
+      "end": 103,
       "value": "|>"
     },
     {
       "type": "whitespace",
-      "start": 101,
-      "end": 102,
+      "start": 103,
+      "end": 104,
       "value": " "
     },
     {
       "type": "word",
-      "start": 102,
-      "end": 107,
+      "start": 104,
+      "end": 109,
       "value": "helix"
     },
     {
       "type": "brace",
-      "start": 107,
-      "end": 108,
+      "start": 109,
+      "end": 110,
       "value": "("
     },
     {
       "type": "brace",
-      "start": 108,
-      "end": 109,
+      "start": 110,
+      "end": 111,
       "value": "{"
     },
     {
       "type": "whitespace",
-      "start": 109,
-      "end": 117,
+      "start": 111,
+      "end": 119,
       "value": "\n       "
     },
     {
       "type": "word",
-      "start": 117,
-      "end": 128,
+      "start": 119,
+      "end": 130,
       "value": "revolutions"
     },
     {
-      "type": "colon",
-      "start": 128,
-      "end": 129,
-      "value": ":"
-    },
-    {
       "type": "whitespace",
-      "start": 129,
-      "end": 130,
-      "value": " "
-    },
-    {
-      "type": "number",
       "start": 130,
-      "end": 132,
-      "value": "16"
-    },
-    {
-      "type": "comma",
-      "start": 132,
-      "end": 133,
-      "value": ","
-    },
-    {
-      "type": "whitespace",
-      "start": 133,
-      "end": 141,
-      "value": "\n       "
-    },
-    {
-      "type": "word",
-      "start": 141,
-      "end": 151,
-      "value": "angleStart"
-    },
-    {
-      "type": "colon",
-      "start": 151,
-      "end": 152,
-      "value": ":"
-    },
-    {
-      "type": "whitespace",
-      "start": 152,
-      "end": 153,
-      "value": " "
-    },
-    {
-      "type": "number",
-      "start": 153,
-      "end": 154,
-      "value": "0"
-    },
-    {
-      "type": "comma",
-      "start": 154,
-      "end": 155,
-      "value": ","
-    },
-    {
-      "type": "whitespace",
-      "start": 155,
-      "end": 163,
-      "value": "\n       "
-    },
-    {
-      "type": "word",
-      "start": 163,
-      "end": 166,
-      "value": "ccw"
-    },
-    {
-      "type": "colon",
-      "start": 166,
-      "end": 167,
-      "value": ":"
-    },
-    {
-      "type": "whitespace",
-      "start": 167,
-      "end": 168,
-      "value": " "
-    },
-    {
-      "type": "keyword",
-      "start": 168,
-      "end": 172,
-      "value": "true"
-    },
-    {
-      "type": "whitespace",
-      "start": 172,
-      "end": 178,
-      "value": "\n     "
-    },
-    {
-      "type": "brace",
-      "start": 178,
-      "end": 179,
-      "value": "}"
-    },
-    {
-      "type": "comma",
-      "start": 179,
-      "end": 180,
-      "value": ","
-    },
-    {
-      "type": "whitespace",
-      "start": 180,
-      "end": 181,
+      "end": 131,
       "value": " "
     },
     {
       "type": "operator",
-      "start": 181,
-      "end": 182,
+      "start": 131,
+      "end": 132,
+      "value": "="
+    },
+    {
+      "type": "whitespace",
+      "start": 132,
+      "end": 133,
+      "value": " "
+    },
+    {
+      "type": "number",
+      "start": 133,
+      "end": 135,
+      "value": "16"
+    },
+    {
+      "type": "comma",
+      "start": 135,
+      "end": 136,
+      "value": ","
+    },
+    {
+      "type": "whitespace",
+      "start": 136,
+      "end": 144,
+      "value": "\n       "
+    },
+    {
+      "type": "word",
+      "start": 144,
+      "end": 154,
+      "value": "angleStart"
+    },
+    {
+      "type": "whitespace",
+      "start": 154,
+      "end": 155,
+      "value": " "
+    },
+    {
+      "type": "operator",
+      "start": 155,
+      "end": 156,
+      "value": "="
+    },
+    {
+      "type": "whitespace",
+      "start": 156,
+      "end": 157,
+      "value": " "
+    },
+    {
+      "type": "number",
+      "start": 157,
+      "end": 158,
+      "value": "0"
+    },
+    {
+      "type": "comma",
+      "start": 158,
+      "end": 159,
+      "value": ","
+    },
+    {
+      "type": "whitespace",
+      "start": 159,
+      "end": 167,
+      "value": "\n       "
+    },
+    {
+      "type": "word",
+      "start": 167,
+      "end": 170,
+      "value": "ccw"
+    },
+    {
+      "type": "whitespace",
+      "start": 170,
+      "end": 171,
+      "value": " "
+    },
+    {
+      "type": "operator",
+      "start": 171,
+      "end": 172,
+      "value": "="
+    },
+    {
+      "type": "whitespace",
+      "start": 172,
+      "end": 173,
+      "value": " "
+    },
+    {
+      "type": "keyword",
+      "start": 173,
+      "end": 177,
+      "value": "true"
+    },
+    {
+      "type": "whitespace",
+      "start": 177,
+      "end": 183,
+      "value": "\n     "
+    },
+    {
+      "type": "brace",
+      "start": 183,
+      "end": 184,
+      "value": "}"
+    },
+    {
+      "type": "comma",
+      "start": 184,
+      "end": 185,
+      "value": ","
+    },
+    {
+      "type": "whitespace",
+      "start": 185,
+      "end": 186,
+      "value": " "
+    },
+    {
+      "type": "operator",
+      "start": 186,
+      "end": 187,
       "value": "%"
     },
     {
       "type": "brace",
-      "start": 182,
-      "end": 183,
+      "start": 187,
+      "end": 188,
       "value": ")"
     },
     {
       "type": "whitespace",
-      "start": 183,
-      "end": 184,
+      "start": 188,
+      "end": 189,
       "value": "\n"
     }
   ]
