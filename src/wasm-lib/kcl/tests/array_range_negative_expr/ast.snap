@@ -1,5 +1,6 @@
 ---
 source: kcl/src/simulation_tests.rs
+assertion_line: 65
 description: Result of parsing array_range_negative_expr.kcl
 snapshot_kind: text
 ---
@@ -9,7 +10,7 @@ snapshot_kind: text
       {
         "declarations": [
           {
-            "end": 19,
+            "end": 14,
             "id": {
               "end": 2,
               "name": "xs",
@@ -17,46 +18,31 @@ snapshot_kind: text
               "type": "Identifier"
             },
             "init": {
-              "end": 19,
+              "end": 14,
               "endElement": {
-                "end": 18,
+                "end": 13,
                 "raw": "5",
-                "start": 17,
+                "start": 12,
                 "type": "Literal",
                 "type": "Literal",
-                "value": 5
+                "value": 5.0
               },
               "endInclusive": true,
               "start": 5,
               "startElement": {
-                "arguments": [
-                  {
-                    "argument": {
-                      "end": 12,
-                      "raw": "5",
-                      "start": 11,
-                      "type": "Literal",
-                      "type": "Literal",
-                      "value": 5
-                    },
-                    "end": 12,
-                    "operator": "-",
-                    "start": 10,
-                    "type": "UnaryExpression",
-                    "type": "UnaryExpression"
-                  }
-                ],
-                "callee": {
-                  "end": 9,
-                  "name": "int",
-                  "start": 6,
-                  "type": "Identifier"
+                "argument": {
+                  "end": 8,
+                  "raw": "5",
+                  "start": 7,
+                  "type": "Literal",
+                  "type": "Literal",
+                  "value": 5.0
                 },
-                "end": 13,
-                "optional": false,
+                "end": 8,
+                "operator": "-",
                 "start": 6,
-                "type": "CallExpression",
-                "type": "CallExpression"
+                "type": "UnaryExpression",
+                "type": "UnaryExpression"
               },
               "type": "ArrayRangeExpression",
               "type": "ArrayRangeExpression"
@@ -65,88 +51,88 @@ snapshot_kind: text
             "type": "VariableDeclarator"
           }
         ],
-        "end": 19,
+        "end": 14,
         "kind": "const",
         "start": 0,
         "type": "VariableDeclaration",
         "type": "VariableDeclaration"
       },
       {
-        "end": 72,
+        "end": 67,
         "expression": {
           "arguments": [
             {
               "computed": false,
-              "end": 37,
+              "end": 32,
               "object": {
-                "end": 34,
+                "end": 29,
                 "name": "xs",
-                "start": 32,
+                "start": 27,
                 "type": "Identifier",
                 "type": "Identifier"
               },
               "property": {
-                "end": 36,
+                "end": 31,
                 "raw": "0",
-                "start": 35,
+                "start": 30,
                 "type": "Literal",
                 "type": "Literal",
-                "value": 0
+                "value": 0.0
               },
-              "start": 32,
+              "start": 27,
               "type": "MemberExpression",
               "type": "MemberExpression"
             },
             {
               "argument": {
-                "end": 41,
+                "end": 36,
                 "raw": "5",
-                "start": 40,
+                "start": 35,
                 "type": "Literal",
                 "type": "Literal",
-                "value": 5
+                "value": 5.0
               },
-              "end": 41,
+              "end": 36,
               "operator": "-",
-              "start": 39,
+              "start": 34,
               "type": "UnaryExpression",
               "type": "UnaryExpression"
             },
             {
-              "end": 48,
+              "end": 43,
               "raw": "0.001",
-              "start": 43,
+              "start": 38,
               "type": "Literal",
               "type": "Literal",
               "value": 0.001
             },
             {
-              "end": 71,
+              "end": 66,
               "raw": "\"first element is -5\"",
-              "start": 50,
+              "start": 45,
               "type": "Literal",
               "type": "Literal",
               "value": "first element is -5"
             }
           ],
           "callee": {
-            "end": 31,
+            "end": 26,
             "name": "assertEqual",
-            "start": 20,
+            "start": 15,
             "type": "Identifier"
           },
-          "end": 72,
+          "end": 67,
           "optional": false,
-          "start": 20,
+          "start": 15,
           "type": "CallExpression",
           "type": "CallExpression"
         },
-        "start": 20,
+        "start": 15,
         "type": "ExpressionStatement",
         "type": "ExpressionStatement"
       }
     ],
-    "end": 73,
+    "end": 68,
     "start": 0
   }
 }

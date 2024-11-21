@@ -1,5 +1,6 @@
 ---
 source: kcl/src/simulation_tests.rs
+assertion_line: 65
 description: Result of parsing helix_ccw.kcl
 snapshot_kind: text
 ---
@@ -64,7 +65,7 @@ snapshot_kind: text
                                 "start": 53,
                                 "type": "Literal",
                                 "type": "Literal",
-                                "value": 5
+                                "value": 5.0
                               },
                               {
                                 "end": 57,
@@ -72,7 +73,7 @@ snapshot_kind: text
                                 "start": 56,
                                 "type": "Literal",
                                 "type": "Literal",
-                                "value": 5
+                                "value": 5.0
                               }
                             ],
                             "end": 58,
@@ -97,7 +98,7 @@ snapshot_kind: text
                             "start": 68,
                             "type": "Literal",
                             "type": "Literal",
-                            "value": 10
+                            "value": 10.0
                           }
                         }
                       ],
@@ -132,7 +133,7 @@ snapshot_kind: text
                       "start": 90,
                       "type": "Literal",
                       "type": "Literal",
-                      "value": 10
+                      "value": 10.0
                     },
                     {
                       "end": 95,
@@ -174,7 +175,7 @@ snapshot_kind: text
                             "start": 130,
                             "type": "Literal",
                             "type": "Literal",
-                            "value": 16
+                            "value": 16.0
                           }
                         },
                         {
@@ -193,7 +194,7 @@ snapshot_kind: text
                             "start": 153,
                             "type": "Literal",
                             "type": "Literal",
-                            "value": 0
+                            "value": 0.0
                           }
                         },
                         {

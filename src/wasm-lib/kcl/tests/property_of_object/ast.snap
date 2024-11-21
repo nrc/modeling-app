@@ -1,5 +1,6 @@
 ---
 source: kcl/src/simulation_tests.rs
+assertion_line: 65
 description: Result of parsing property_of_object.kcl
 snapshot_kind: text
 ---
@@ -35,7 +36,7 @@ snapshot_kind: text
                     "start": 63,
                     "type": "Literal",
                     "type": "Literal",
-                    "value": 1
+                    "value": 1.0
                   }
                 },
                 {
@@ -54,7 +55,7 @@ snapshot_kind: text
                     "start": 71,
                     "type": "Literal",
                     "type": "Literal",
-                    "value": 0
+                    "value": 0.0
                   }
                 }
               ],
@@ -131,7 +132,7 @@ snapshot_kind: text
               "start": 160,
               "type": "Literal",
               "type": "Literal",
-              "value": 1
+              "value": 1.0
             },
             {
               "end": 188,
@@ -175,7 +176,7 @@ snapshot_kind: text
               "start": 219,
               "type": "Literal",
               "type": "Literal",
-              "value": 1
+              "value": 1.0
             },
             {
               "end": 247,
@@ -288,7 +289,7 @@ snapshot_kind: text
               "start": 390,
               "type": "Literal",
               "type": "Literal",
-              "value": 1
+              "value": 1.0
             },
             {
               "end": 419,
@@ -332,7 +333,7 @@ snapshot_kind: text
               "start": 450,
               "type": "Literal",
               "type": "Literal",
-              "value": 1
+              "value": 1.0
             },
             {
               "end": 479,
@@ -478,7 +479,7 @@ snapshot_kind: text
               "start": 598,
               "type": "Literal",
               "type": "Literal",
-              "value": 1
+              "value": 1.0
             },
             {
               "end": 626,
@@ -522,7 +523,7 @@ snapshot_kind: text
               "start": 657,
               "type": "Literal",
               "type": "Literal",
-              "value": 1
+              "value": 1.0
             },
             {
               "end": 685,
@@ -621,7 +622,7 @@ snapshot_kind: text
               "start": 798,
               "type": "Literal",
               "type": "Literal",
-              "value": 1
+              "value": 1.0
             },
             {
               "end": 827,
@@ -665,7 +666,7 @@ snapshot_kind: text
               "start": 858,
               "type": "Literal",
               "type": "Literal",
-              "value": 1
+              "value": 1.0
             },
             {
               "end": 887,

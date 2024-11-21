@@ -1,5 +1,6 @@
 ---
 source: kcl/src/simulation_tests.rs
+assertion_line: 65
 description: Result of parsing index_of_array.kcl
 snapshot_kind: text
 ---
@@ -24,7 +25,7 @@ snapshot_kind: text
                   "start": 42,
                   "type": "Literal",
                   "type": "Literal",
-                  "value": 90
+                  "value": 90.0
                 },
                 {
                   "end": 48,
@@ -32,7 +33,7 @@ snapshot_kind: text
                   "start": 46,
                   "type": "Literal",
                   "type": "Literal",
-                  "value": 91
+                  "value": 91.0
                 },
                 {
                   "end": 52,
@@ -40,7 +41,7 @@ snapshot_kind: text
                   "start": 50,
                   "type": "Literal",
                   "type": "Literal",
-                  "value": 92
+                  "value": 92.0
                 }
               ],
               "end": 53,
@@ -84,7 +85,7 @@ snapshot_kind: text
                 "start": 95,
                 "type": "Literal",
                 "type": "Literal",
-                "value": 1
+                "value": 1.0
               },
               "start": 91,
               "type": "MemberExpression",
@@ -117,7 +118,7 @@ snapshot_kind: text
               "start": 127,
               "type": "Literal",
               "type": "Literal",
-              "value": 91
+              "value": 91.0
             },
             {
               "end": 156,
@@ -161,7 +162,7 @@ snapshot_kind: text
               "start": 189,
               "type": "Literal",
               "type": "Literal",
-              "value": 91
+              "value": 91.0
             },
             {
               "end": 218,
@@ -191,7 +192,7 @@ snapshot_kind: text
       {
         "declarations": [
           {
-            "end": 262,
+            "end": 257,
             "id": {
               "end": 249,
               "name": "i",
@@ -199,48 +200,33 @@ snapshot_kind: text
               "type": "Identifier"
             },
             "init": {
-              "arguments": [
-                {
-                  "end": 261,
-                  "left": {
-                    "end": 257,
-                    "raw": "1",
-                    "start": 256,
-                    "type": "Literal",
-                    "type": "Literal",
-                    "value": 1
-                  },
-                  "operator": "+",
-                  "right": {
-                    "end": 261,
-                    "raw": "0",
-                    "start": 260,
-                    "type": "Literal",
-                    "type": "Literal",
-                    "value": 0
-                  },
-                  "start": 256,
-                  "type": "BinaryExpression",
-                  "type": "BinaryExpression"
-                }
-              ],
-              "callee": {
-                "end": 255,
-                "name": "int",
+              "end": 257,
+              "left": {
+                "end": 253,
+                "raw": "1",
                 "start": 252,
-                "type": "Identifier"
+                "type": "Literal",
+                "type": "Literal",
+                "value": 1.0
               },
-              "end": 262,
-              "optional": false,
+              "operator": "+",
+              "right": {
+                "end": 257,
+                "raw": "0",
+                "start": 256,
+                "type": "Literal",
+                "type": "Literal",
+                "value": 0.0
+              },
               "start": 252,
-              "type": "CallExpression",
-              "type": "CallExpression"
+              "type": "BinaryExpression",
+              "type": "BinaryExpression"
             },
             "start": 248,
             "type": "VariableDeclarator"
           }
         ],
-        "end": 262,
+        "end": 257,
         "kind": "const",
         "start": 248,
         "type": "VariableDeclaration",
@@ -249,134 +235,134 @@ snapshot_kind: text
       {
         "declarations": [
           {
-            "end": 279,
+            "end": 274,
             "id": {
-              "end": 270,
+              "end": 265,
               "name": "result1",
-              "start": 263,
+              "start": 258,
               "type": "Identifier"
             },
             "init": {
               "computed": true,
-              "end": 279,
+              "end": 274,
               "object": {
-                "end": 276,
+                "end": 271,
                 "name": "arr",
-                "start": 273,
+                "start": 268,
                 "type": "Identifier",
                 "type": "Identifier"
               },
               "property": {
-                "end": 278,
+                "end": 273,
                 "name": "i",
-                "start": 277,
+                "start": 272,
                 "type": "Identifier",
                 "type": "Identifier"
               },
-              "start": 273,
+              "start": 268,
               "type": "MemberExpression",
               "type": "MemberExpression"
             },
-            "start": 263,
+            "start": 258,
             "type": "VariableDeclarator"
           }
         ],
-        "end": 279,
+        "end": 274,
         "kind": "const",
-        "start": 263,
+        "start": 258,
         "type": "VariableDeclaration",
         "type": "VariableDeclaration"
       },
       {
-        "end": 340,
+        "end": 335,
         "expression": {
           "arguments": [
             {
-              "end": 307,
+              "end": 302,
               "name": "result1",
-              "start": 300,
+              "start": 295,
               "type": "Identifier",
               "type": "Identifier"
             },
             {
-              "end": 311,
+              "end": 306,
               "raw": "91",
-              "start": 309,
+              "start": 304,
               "type": "Literal",
               "type": "Literal",
-              "value": 91
+              "value": 91.0
             },
             {
-              "end": 339,
+              "end": 334,
               "raw": "\"Computed property lookup\"",
-              "start": 313,
+              "start": 308,
               "type": "Literal",
               "type": "Literal",
               "value": "Computed property lookup"
             }
           ],
           "callee": {
-            "end": 299,
+            "end": 294,
             "name": "assertLessThanOrEq",
-            "start": 281,
+            "start": 276,
             "type": "Identifier"
           },
-          "end": 340,
+          "end": 335,
           "optional": false,
-          "start": 281,
+          "start": 276,
           "type": "CallExpression",
           "type": "CallExpression"
         },
-        "start": 281,
+        "start": 276,
         "type": "ExpressionStatement",
         "type": "ExpressionStatement"
       },
       {
-        "end": 403,
+        "end": 398,
         "expression": {
           "arguments": [
             {
-              "end": 370,
+              "end": 365,
               "name": "result1",
-              "start": 363,
+              "start": 358,
               "type": "Identifier",
               "type": "Identifier"
             },
             {
-              "end": 374,
+              "end": 369,
               "raw": "91",
-              "start": 372,
+              "start": 367,
               "type": "Literal",
               "type": "Literal",
-              "value": 91
+              "value": 91.0
             },
             {
-              "end": 402,
+              "end": 397,
               "raw": "\"Computed property lookup\"",
-              "start": 376,
+              "start": 371,
               "type": "Literal",
               "type": "Literal",
               "value": "Computed property lookup"
             }
           ],
           "callee": {
-            "end": 362,
+            "end": 357,
             "name": "assertGreaterThanOrEq",
-            "start": 341,
+            "start": 336,
             "type": "Identifier"
           },
-          "end": 403,
+          "end": 398,
           "optional": false,
-          "start": 341,
+          "start": 336,
           "type": "CallExpression",
           "type": "CallExpression"
         },
-        "start": 341,
+        "start": 336,
         "type": "ExpressionStatement",
         "type": "ExpressionStatement"
       }
     ],
-    "end": 404,
+    "end": 399,
     "nonCodeMeta": {
       "nonCodeNodes": {
         "0": [
@@ -431,8 +417,8 @@ snapshot_kind: text
         ],
         "5": [
           {
-            "end": 281,
-            "start": 279,
+            "end": 276,
+            "start": 274,
             "type": "NonCodeNode",
             "value": {
               "type": "newLine"

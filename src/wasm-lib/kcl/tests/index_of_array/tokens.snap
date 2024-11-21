@@ -1,5 +1,6 @@
 ---
 source: kcl/src/simulation_tests.rs
+assertion_line: 51
 description: Result of tokenizing index_of_array.kcl
 snapshot_kind: text
 ---
@@ -336,243 +337,225 @@ snapshot_kind: text
       "value": " "
     },
     {
-      "type": "word",
+      "type": "number",
       "start": 252,
-      "end": 255,
-      "value": "int"
+      "end": 253,
+      "value": "1"
     },
     {
-      "type": "brace",
+      "type": "whitespace",
+      "start": 253,
+      "end": 254,
+      "value": " "
+    },
+    {
+      "type": "operator",
+      "start": 254,
+      "end": 255,
+      "value": "+"
+    },
+    {
+      "type": "whitespace",
       "start": 255,
       "end": 256,
-      "value": "("
+      "value": " "
     },
     {
       "type": "number",
       "start": 256,
       "end": 257,
-      "value": "1"
+      "value": "0"
     },
     {
       "type": "whitespace",
       "start": 257,
       "end": 258,
-      "value": " "
-    },
-    {
-      "type": "operator",
-      "start": 258,
-      "end": 259,
-      "value": "+"
-    },
-    {
-      "type": "whitespace",
-      "start": 259,
-      "end": 260,
-      "value": " "
-    },
-    {
-      "type": "number",
-      "start": 260,
-      "end": 261,
-      "value": "0"
-    },
-    {
-      "type": "brace",
-      "start": 261,
-      "end": 262,
-      "value": ")"
-    },
-    {
-      "type": "whitespace",
-      "start": 262,
-      "end": 263,
       "value": "\n"
     },
     {
       "type": "word",
-      "start": 263,
-      "end": 270,
+      "start": 258,
+      "end": 265,
       "value": "result1"
     },
     {
       "type": "whitespace",
-      "start": 270,
-      "end": 271,
+      "start": 265,
+      "end": 266,
       "value": " "
     },
     {
       "type": "operator",
-      "start": 271,
-      "end": 272,
+      "start": 266,
+      "end": 267,
       "value": "="
     },
     {
       "type": "whitespace",
-      "start": 272,
-      "end": 273,
+      "start": 267,
+      "end": 268,
       "value": " "
     },
     {
       "type": "word",
-      "start": 273,
-      "end": 276,
+      "start": 268,
+      "end": 271,
       "value": "arr"
     },
     {
       "type": "brace",
-      "start": 276,
-      "end": 277,
+      "start": 271,
+      "end": 272,
       "value": "["
     },
     {
       "type": "word",
-      "start": 277,
-      "end": 278,
+      "start": 272,
+      "end": 273,
       "value": "i"
     },
     {
       "type": "brace",
-      "start": 278,
-      "end": 279,
+      "start": 273,
+      "end": 274,
       "value": "]"
     },
     {
       "type": "whitespace",
-      "start": 279,
-      "end": 281,
+      "start": 274,
+      "end": 276,
       "value": "\n\n"
     },
     {
       "type": "word",
-      "start": 281,
-      "end": 299,
+      "start": 276,
+      "end": 294,
       "value": "assertLessThanOrEq"
     },
     {
       "type": "brace",
-      "start": 299,
-      "end": 300,
+      "start": 294,
+      "end": 295,
       "value": "("
     },
     {
       "type": "word",
-      "start": 300,
-      "end": 307,
+      "start": 295,
+      "end": 302,
       "value": "result1"
     },
     {
       "type": "comma",
-      "start": 307,
-      "end": 308,
+      "start": 302,
+      "end": 303,
       "value": ","
     },
     {
       "type": "whitespace",
-      "start": 308,
-      "end": 309,
+      "start": 303,
+      "end": 304,
       "value": " "
     },
     {
       "type": "number",
-      "start": 309,
-      "end": 311,
+      "start": 304,
+      "end": 306,
       "value": "91"
     },
     {
       "type": "comma",
-      "start": 311,
-      "end": 312,
+      "start": 306,
+      "end": 307,
       "value": ","
     },
     {
       "type": "whitespace",
-      "start": 312,
-      "end": 313,
+      "start": 307,
+      "end": 308,
       "value": " "
     },
     {
       "type": "string",
-      "start": 313,
-      "end": 339,
+      "start": 308,
+      "end": 334,
       "value": "\"Computed property lookup\""
     },
     {
       "type": "brace",
-      "start": 339,
-      "end": 340,
+      "start": 334,
+      "end": 335,
       "value": ")"
     },
     {
       "type": "whitespace",
-      "start": 340,
-      "end": 341,
+      "start": 335,
+      "end": 336,
       "value": "\n"
     },
     {
       "type": "word",
-      "start": 341,
-      "end": 362,
+      "start": 336,
+      "end": 357,
       "value": "assertGreaterThanOrEq"
     },
     {
       "type": "brace",
-      "start": 362,
-      "end": 363,
+      "start": 357,
+      "end": 358,
       "value": "("
     },
     {
       "type": "word",
-      "start": 363,
-      "end": 370,
+      "start": 358,
+      "end": 365,
       "value": "result1"
     },
     {
       "type": "comma",
-      "start": 370,
-      "end": 371,
+      "start": 365,
+      "end": 366,
       "value": ","
     },
     {
       "type": "whitespace",
-      "start": 371,
-      "end": 372,
+      "start": 366,
+      "end": 367,
       "value": " "
     },
     {
       "type": "number",
-      "start": 372,
-      "end": 374,
+      "start": 367,
+      "end": 369,
       "value": "91"
     },
     {
       "type": "comma",
-      "start": 374,
-      "end": 375,
+      "start": 369,
+      "end": 370,
       "value": ","
     },
     {
       "type": "whitespace",
-      "start": 375,
-      "end": 376,
+      "start": 370,
+      "end": 371,
       "value": " "
     },
     {
       "type": "string",
-      "start": 376,
-      "end": 402,
+      "start": 371,
+      "end": 397,
       "value": "\"Computed property lookup\""
     },
     {
       "type": "brace",
-      "start": 402,
-      "end": 403,
+      "start": 397,
+      "end": 398,
       "value": ")"
     },
     {
       "type": "whitespace",
-      "start": 403,
-      "end": 404,
+      "start": 398,
+      "end": 399,
       "value": "\n"
     }
   ]

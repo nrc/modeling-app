@@ -1,5 +1,6 @@
 ---
 source: kcl/src/simulation_tests.rs
+assertion_line: 102
 description: Program memory after executing array_range_expr.kcl
 snapshot_kind: text
 ---
@@ -28,21 +29,28 @@ snapshot_kind: text
           "__meta": []
         },
         "five": {
-          "type": "Int",
-          "value": 5,
+          "type": "Number",
+          "value": 5.0,
           "__meta": [
             {
               "sourceRange": [
-                175,
-                188,
+                79,
+                80,
+                0
+              ]
+            },
+            {
+              "sourceRange": [
+                182,
+                183,
                 0
               ]
             }
           ]
         },
         "four": {
-          "type": "Int",
-          "value": 4,
+          "type": "Number",
+          "value": 4.0,
           "__meta": [
             {
               "sourceRange": [
@@ -220,8 +228,8 @@ snapshot_kind: text
               "__meta": [
                 {
                   "sourceRange": [
-                    194,
-                    206,
+                    189,
+                    201,
                     0
                   ]
                 }
@@ -233,8 +241,8 @@ snapshot_kind: text
               "__meta": [
                 {
                   "sourceRange": [
-                    194,
-                    206,
+                    189,
+                    201,
                     0
                   ]
                 }
@@ -246,8 +254,8 @@ snapshot_kind: text
               "__meta": [
                 {
                   "sourceRange": [
-                    194,
-                    206,
+                    189,
+                    201,
                     0
                   ]
                 }
@@ -259,8 +267,8 @@ snapshot_kind: text
               "__meta": [
                 {
                   "sourceRange": [
-                    194,
-                    206,
+                    189,
+                    201,
                     0
                   ]
                 }
@@ -272,8 +280,8 @@ snapshot_kind: text
               "__meta": [
                 {
                   "sourceRange": [
-                    194,
-                    206,
+                    189,
+                    201,
                     0
                   ]
                 }
@@ -285,8 +293,8 @@ snapshot_kind: text
               "__meta": [
                 {
                   "sourceRange": [
-                    194,
-                    206,
+                    189,
+                    201,
                     0
                   ]
                 }
@@ -296,8 +304,8 @@ snapshot_kind: text
           "__meta": [
             {
               "sourceRange": [
-                194,
-                206,
+                189,
+                201,
                 0
               ]
             }
@@ -312,8 +320,8 @@ snapshot_kind: text
               "__meta": [
                 {
                   "sourceRange": [
-                    341,
-                    373,
+                    336,
+                    358,
                     0
                   ]
                 }
@@ -325,8 +333,8 @@ snapshot_kind: text
               "__meta": [
                 {
                   "sourceRange": [
-                    341,
-                    373,
+                    336,
+                    358,
                     0
                   ]
                 }
@@ -338,8 +346,8 @@ snapshot_kind: text
               "__meta": [
                 {
                   "sourceRange": [
-                    341,
-                    373,
+                    336,
+                    358,
                     0
                   ]
                 }
@@ -351,8 +359,8 @@ snapshot_kind: text
               "__meta": [
                 {
                   "sourceRange": [
-                    341,
-                    373,
+                    336,
+                    358,
                     0
                   ]
                 }
@@ -362,16 +370,16 @@ snapshot_kind: text
           "__meta": [
             {
               "sourceRange": [
-                341,
-                373,
+                336,
+                358,
                 0
               ]
             }
           ]
         },
         "zero": {
-          "type": "Int",
-          "value": 0,
+          "type": "Number",
+          "value": 0.0,
           "__meta": [
             {
               "sourceRange": [

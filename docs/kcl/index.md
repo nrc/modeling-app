@@ -85,6 +85,7 @@ layout: manual
 * [`reduce`](kcl/reduce)
 * [`rem`](kcl/rem)
 * [`revolve`](kcl/revolve)
+* [`round`](kcl/round)
 * [`segAng`](kcl/segAng)
 * [`segEnd`](kcl/segEnd)
 * [`segEndX`](kcl/segEndX)

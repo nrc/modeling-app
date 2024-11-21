@@ -1,5 +1,6 @@
 ---
 source: kcl/src/simulation_tests.rs
+assertion_line: 102
 description: Program memory after executing array_range_negative_expr.kcl
 snapshot_kind: text
 ---
@@ -37,7 +38,7 @@ snapshot_kind: text
                 {
                   "sourceRange": [
                     5,
-                    19,
+                    14,
                     0
                   ]
                 }
@@ -50,7 +51,7 @@ snapshot_kind: text
                 {
                   "sourceRange": [
                     5,
-                    19,
+                    14,
                     0
                   ]
                 }
@@ -63,7 +64,7 @@ snapshot_kind: text
                 {
                   "sourceRange": [
                     5,
-                    19,
+                    14,
                     0
                   ]
                 }
@@ -76,7 +77,7 @@ snapshot_kind: text
                 {
                   "sourceRange": [
                     5,
-                    19,
+                    14,
                     0
                   ]
                 }
@@ -89,7 +90,7 @@ snapshot_kind: text
                 {
                   "sourceRange": [
                     5,
-                    19,
+                    14,
                     0
                   ]
                 }
@@ -102,7 +103,7 @@ snapshot_kind: text
                 {
                   "sourceRange": [
                     5,
-                    19,
+                    14,
                     0
                   ]
                 }
@@ -115,7 +116,7 @@ snapshot_kind: text
                 {
                   "sourceRange": [
                     5,
-                    19,
+                    14,
                     0
                   ]
                 }
@@ -128,7 +129,7 @@ snapshot_kind: text
                 {
                   "sourceRange": [
                     5,
-                    19,
+                    14,
                     0
                   ]
                 }
@@ -141,7 +142,7 @@ snapshot_kind: text
                 {
                   "sourceRange": [
                     5,
-                    19,
+                    14,
                     0
                   ]
                 }
@@ -154,7 +155,7 @@ snapshot_kind: text
                 {
                   "sourceRange": [
                     5,
-                    19,
+                    14,
                     0
                   ]
                 }
@@ -167,7 +168,7 @@ snapshot_kind: text
                 {
                   "sourceRange": [
                     5,
-                    19,
+                    14,
                     0
                   ]
                 }
@@ -178,7 +179,7 @@ snapshot_kind: text
             {
               "sourceRange": [
                 5,
-                19,
+                14,
                 0
               ]
             }

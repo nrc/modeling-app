@@ -95,7 +95,7 @@ impl Node<MemberExpression> {
                     source_ranges: vec![self.clone().into()],
                 }))
             }
-            (KclValue::Array { value: arr, meta: _ }, Property::Number(index)) => {
+            (KclValue::Array { value: arr, meta: _ }, Property::UInt(index)) => {
                 let value_of_arr = arr.get(index);
                 if let Some(value) = value_of_arr {
                     Ok(value.to_owned())
@@ -742,7 +742,7 @@ impl Node<IfExpression> {
 
 #[derive(Debug)]
 enum Property {
-    Number(usize),
+    UInt(usize),
     String(String),
 }
 
@@ -770,9 +770,9 @@ impl Property {
             LiteralIdentifier::Literal(literal) => {
                 let value = literal.value.clone();
                 match value {
-                    LiteralValue::IInteger(x) => {
-                        if let Ok(x) = u64::try_from(x) {
-                            Ok(Property::Number(x.try_into().unwrap()))
+                    LiteralValue::Number(x) => {
+                        if let Some(x) = crate::try_f64_to_usize(x) {
+                            Ok(Property::UInt(x))
                         } else {
                             Err(KclError::Semantic(KclErrorDetails {
                                 source_ranges: property_sr,
@@ -783,7 +783,7 @@ impl Property {
                     LiteralValue::String(s) => Ok(Property::String(s)),
                     _ => Err(KclError::Semantic(KclErrorDetails {
                         source_ranges: vec![sr],
-                        message: "Only strings or ints (>= 0) can be properties/indexes".to_owned(),
+                        message: "Only strings or numbers (>= 0) can be properties/indexes".to_owned(),
                     })),
                 }
             }
@@ -802,7 +802,7 @@ fn jvalue_to_prop(value: &KclValue, property_sr: Vec<SourceRange>, name: &str) -
         KclValue::Int { value:num, meta: _ } => {
             let maybe_int: Result<usize, _> = (*num).try_into();
             if let Ok(uint) = maybe_int {
-                Ok(Property::Number(uint))
+                Ok(Property::UInt(uint))
             }
             else {
                 make_err(format!("'{num}' is negative, so you can't index an array with it"))
@@ -816,7 +816,7 @@ fn jvalue_to_prop(value: &KclValue, property_sr: Vec<SourceRange>, name: &str) -
             let nearest_int = num.round();
             let delta = num-nearest_int;
             if delta < FLOAT_TO_INT_MAX_DELTA {
-                Ok(Property::Number(nearest_int as usize))
+                Ok(Property::UInt(nearest_int as usize))
             } else {
                 make_err(format!("'{num}' is not an integer, so you can't index an array with it"))
             }
@@ -830,7 +830,7 @@ fn jvalue_to_prop(value: &KclValue, property_sr: Vec<SourceRange>, name: &str) -
 impl Property {
     fn type_name(&self) -> &'static str {
         match self {
-            Property::Number(_) => "number",
+            Property::UInt(_) => "number",
             Property::String(_) => "string",
         }
     }

@@ -19,7 +19,7 @@ use crate::{
     errors::{KclError, KclErrorDetails},
     executor::{ExecState, Geometries, Geometry, KclValue, Point3d, Sketch, SketchSet, Solid, SolidSet, SourceRange},
     function_param::FunctionParam,
-    std::{types::Uint, Args},
+    std::Args,
 };
 
 const MUST_HAVE_ONE_INSTANCE: &str = "There must be at least 1 instance of your geometry";
@@ -33,7 +33,7 @@ pub struct LinearPattern2dData {
     /// This includes the original entity. For example, if instances is 2,
     /// there will be two copies -- the original, and one new copy.
     /// If instances is 1, this has no effect.
-    pub instances: Uint,
+    pub instances: u32,
     /// The distance between each repetition. This can also be referred to as spacing.
     pub distance: f64,
     /// The axis of the pattern. This is a 2D vector.
@@ -49,7 +49,7 @@ pub struct LinearPattern3dData {
     /// This includes the original entity. For example, if instances is 2,
     /// there will be two copies -- the original, and one new copy.
     /// If instances is 1, this has no effect.
-    pub instances: Uint,
+    pub instances: u32,
     /// The distance between each repetition. This can also be referred to as spacing.
     pub distance: f64,
     /// The axis of the pattern.
@@ -71,8 +71,8 @@ impl LinearPattern {
 
     fn repetitions(&self) -> RepetitionsNeeded {
         let n = match self {
-            LinearPattern::TwoD(lp) => lp.instances.u32(),
-            LinearPattern::ThreeD(lp) => lp.instances.u32(),
+            LinearPattern::TwoD(lp) => lp.instances,
+            LinearPattern::ThreeD(lp) => lp.instances,
         };
         RepetitionsNeeded::from(n)
     }
@@ -773,7 +773,7 @@ pub struct CircularPattern2dData {
     /// This includes the original entity. For example, if instances is 2,
     /// there will be two copies -- the original, and one new copy.
     /// If instances is 1, this has no effect.
-    pub instances: Uint,
+    pub instances: u32,
     /// The center about which to make the pattern. This is a 2D vector.
     pub center: [f64; 2],
     /// The arc angle (in degrees) to place the repetitions. Must be greater than 0.
@@ -791,7 +791,7 @@ pub struct CircularPattern3dData {
     /// This includes the original entity. For example, if instances is 2,
     /// there will be two copies -- the original, and one new copy.
     /// If instances is 1, this has no effect.
-    pub instances: Uint,
+    pub instances: u32,
     /// The axis around which to make the pattern. This is a 3D vector.
     pub axis: [f64; 3],
     /// The center about which to make the pattern. This is a 3D vector.
@@ -843,8 +843,8 @@ impl CircularPattern {
 
     fn repetitions(&self) -> RepetitionsNeeded {
         let n = match self {
-            CircularPattern::TwoD(lp) => lp.instances.u32(),
-            CircularPattern::ThreeD(lp) => lp.instances.u32(),
+            CircularPattern::TwoD(lp) => lp.instances,
+            CircularPattern::ThreeD(lp) => lp.instances,
         };
         RepetitionsNeeded::from(n)
     }
