@@ -4,7 +4,10 @@ use anyhow::Result;
 
 use crate::{
     lint::rule::{def_finding, Discovered, Finding},
-    parsing::ast::types::{BinaryPart, Expr, LiteralValue, ObjectExpression, UnaryOperator},
+    parsing::{
+        ast::types::{BinaryPart, Expr, LiteralValue, ObjectExpression, UnaryOperator},
+        token::NumericSuffix,
+    },
     walk::Node,
     SourceRange,
 };
@@ -163,7 +166,10 @@ fn get_xyz(point: &ObjectExpression) -> Option<(f64, f64, f64)> {
 
     fn unlitafy(lit: &LiteralValue) -> Option<f64> {
         Some(match lit {
-            LiteralValue::Number(value) => *value,
+            LiteralValue::Number {
+                value,
+                suffix: NumericSuffix::None,
+            } => *value,
             _ => {
                 return None;
             }

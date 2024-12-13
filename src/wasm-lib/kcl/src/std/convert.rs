@@ -4,7 +4,7 @@ use derive_docs::stdlib;
 
 use crate::{
     errors::KclError,
-    execution::{ExecState, KclValue},
+    execution::{kcl_value::NumericType, ExecState, KclValue},
     std::Args,
 };
 
@@ -13,7 +13,7 @@ pub async fn int(_exec_state: &mut ExecState, args: Args) -> Result<KclValue, Kc
     let num = args.get_number()?;
     let converted = inner_int(num)?;
 
-    Ok(args.make_user_val_from_f64(converted))
+    Ok(args.make_user_val_from_f64(converted, NumericType::count()))
 }
 
 /// Convert a number to an integer.

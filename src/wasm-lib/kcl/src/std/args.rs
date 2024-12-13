@@ -8,8 +8,8 @@ use super::shapes::PolygonType;
 use crate::{
     errors::{KclError, KclErrorDetails},
     execution::{
-        ExecState, ExecutorContext, ExtrudeSurface, Helix, KclObjectFields, KclValue, Metadata, Sketch, SketchSet,
-        SketchSurface, Solid, SolidSet, TagIdentifier,
+        kcl_value::NumericType, ExecState, ExecutorContext, ExtrudeSurface, Helix, KclObjectFields, KclValue, Metadata,
+        Sketch, SketchSet, SketchSurface, Solid, SolidSet, TagIdentifier,
     },
     parsing::ast::types::TagNode,
     source_range::SourceRange,
@@ -301,10 +301,12 @@ impl Args {
         };
         let x = KclValue::Number {
             value: p[0],
+            ty: NumericType::internal_length(),
             meta: vec![meta],
         };
         let y = KclValue::Number {
             value: p[1],
+            ty: NumericType::internal_length(),
             meta: vec![meta],
         };
         Ok(KclValue::Array {
@@ -313,31 +315,14 @@ impl Args {
         })
     }
 
-    pub(crate) fn make_user_val_from_f64(&self, f: f64) -> KclValue {
+    pub(crate) fn make_user_val_from_f64(&self, f: f64, ty: NumericType) -> KclValue {
         KclValue::from_number(
             f,
+            ty,
             vec![Metadata {
                 source_range: self.source_range,
             }],
         )
-    }
-
-    pub(crate) fn make_user_val_from_f64_array(&self, f: Vec<f64>) -> Result<KclValue, KclError> {
-        let array = f
-            .into_iter()
-            .map(|n| KclValue::Number {
-                value: n,
-                meta: vec![Metadata {
-                    source_range: self.source_range,
-                }],
-            })
-            .collect::<Vec<_>>();
-        Ok(KclValue::Array {
-            value: array,
-            meta: vec![Metadata {
-                source_range: self.source_range,
-            }],
-        })
     }
 
     pub(crate) fn get_number(&self) -> Result<f64, KclError> {

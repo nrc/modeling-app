@@ -11,6 +11,7 @@ use parse_display::{Display, FromStr};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
+use crate::execution::kcl_value::NumericType;
 use crate::execution::{Artifact, ArtifactId, ArtifactInner};
 use crate::{
     errors::{KclError, KclErrorDetails},
@@ -1335,7 +1336,7 @@ pub(crate) async fn inner_start_profile_at(
 pub async fn profile_start_x(_exec_state: &mut ExecState, args: Args) -> Result<KclValue, KclError> {
     let sketch: Sketch = args.get_sketch()?;
     let x = inner_profile_start_x(sketch)?;
-    Ok(args.make_user_val_from_f64(x))
+    Ok(args.make_user_val_from_f64(x, NumericType::internal_length()))
 }
 
 /// Extract the provided 2-dimensional sketch's profile's origin's 'x'
@@ -1359,7 +1360,7 @@ pub(crate) fn inner_profile_start_x(sketch: Sketch) -> Result<f64, KclError> {
 pub async fn profile_start_y(_exec_state: &mut ExecState, args: Args) -> Result<KclValue, KclError> {
     let sketch: Sketch = args.get_sketch()?;
     let x = inner_profile_start_y(sketch)?;
-    Ok(args.make_user_val_from_f64(x))
+    Ok(args.make_user_val_from_f64(x, NumericType::internal_length()))
 }
 
 /// Extract the provided 2-dimensional sketch's profile's origin's 'y'
@@ -1382,7 +1383,11 @@ pub(crate) fn inner_profile_start_y(sketch: Sketch) -> Result<f64, KclError> {
 pub async fn profile_start(_exec_state: &mut ExecState, args: Args) -> Result<KclValue, KclError> {
     let sketch: Sketch = args.get_sketch()?;
     let point = inner_profile_start(sketch)?;
-    Ok(KclValue::from_point2d(point, args.into()))
+    Ok(KclValue::from_point2d(
+        point,
+        NumericType::internal_length(),
+        args.into(),
+    ))
 }
 
 /// Extract the provided 2-dimensional sketch's profile's origin

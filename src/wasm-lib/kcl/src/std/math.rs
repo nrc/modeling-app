@@ -5,7 +5,7 @@ use derive_docs::stdlib;
 
 use crate::{
     errors::{KclError, KclErrorDetails},
-    execution::{ExecState, KclValue},
+    execution::{kcl_value::NumericType, ExecState, KclValue},
     std::Args,
 };
 
@@ -140,7 +140,7 @@ fn inner_tan(num: f64) -> Result<f64, KclError> {
 pub async fn pi(_exec_state: &mut ExecState, args: Args) -> Result<KclValue, KclError> {
     let result = inner_pi()?;
 
-    Ok(args.make_user_val_from_f64(result))
+    Ok(args.make_user_val_from_f64(result, NumericType::count()))
 }
 
 /// Return the value of `pi`. Archimedes’ constant (π).
@@ -688,7 +688,7 @@ fn inner_ln(num: f64) -> Result<f64, KclError> {
 pub async fn e(_exec_state: &mut ExecState, args: Args) -> Result<KclValue, KclError> {
     let result = inner_e()?;
 
-    Ok(args.make_user_val_from_f64(result))
+    Ok(args.make_user_val_from_f64(result, NumericType::count()))
 }
 
 /// Return the value of Euler’s number `e`.
@@ -717,7 +717,7 @@ fn inner_e() -> Result<f64, KclError> {
 pub async fn tau(_exec_state: &mut ExecState, args: Args) -> Result<KclValue, KclError> {
     let result = inner_tau()?;
 
-    Ok(args.make_user_val_from_f64(result))
+    Ok(args.make_user_val_from_f64(result, NumericType::count()))
 }
 
 /// Return the value of `tau`. The full circle constant (τ). Equal to 2π.

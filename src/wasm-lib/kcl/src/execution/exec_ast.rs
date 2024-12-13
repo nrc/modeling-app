@@ -20,6 +20,7 @@ use crate::{
 };
 
 use super::cad_op::{OpArg, Operation};
+use super::kcl_value::NumericType;
 
 const FLOAT_TO_INT_MAX_DELTA: f64 = 0.01;
 
@@ -27,7 +28,7 @@ impl BinaryPart {
     #[async_recursion]
     pub async fn get_result(&self, exec_state: &mut ExecState, ctx: &ExecutorContext) -> Result<KclValue, KclError> {
         match self {
-            BinaryPart::Literal(literal) => Ok(literal.into()),
+            BinaryPart::Literal(literal) => Ok(KclValue::from_literal(literal, &exec_state.mod_local.settings)),
             BinaryPart::Identifier(identifier) => {
                 let value = exec_state.memory().get(&identifier.name, identifier.into())?;
                 Ok(value.clone())
@@ -206,32 +207,45 @@ impl Node<BinaryExpression> {
             return Ok(KclValue::Bool { value: raw_value, meta });
         }
 
-        let left = parse_number_as_f64(&left_value, self.left.clone().into())?;
-        let right = parse_number_as_f64(&right_value, self.right.clone().into())?;
+        let (left, lty) = parse_number_as_f64(&left_value, self.left.clone().into())?;
+        let (right, rty) = parse_number_as_f64(&right_value, self.right.clone().into())?;
 
         let value = match self.operator {
-            BinaryOperator::Add => KclValue::Number {
-                value: left + right,
-                meta,
-            },
-            BinaryOperator::Sub => KclValue::Number {
-                value: left - right,
-                meta,
-            },
+            BinaryOperator::Add => {
+                let ty_result = lty.add(&rty, left, right, exec_state.mut_memory(), self.into())?;
+                KclValue::Number {
+                    value: ty_result.lhs + ty_result.rhs,
+                    ty: ty_result.result_type,
+                    meta,
+                }
+            }
+            BinaryOperator::Sub => {
+                let ty_result = lty.add(&rty, left, right, exec_state.mut_memory(), self.into())?;
+                KclValue::Number {
+                    value: ty_result.lhs - ty_result.rhs,
+                    ty: ty_result.result_type,
+                    meta,
+                }
+            }
+            // TODO
             BinaryOperator::Mul => KclValue::Number {
                 value: left * right,
+                ty: NumericType::Any,
                 meta,
             },
             BinaryOperator::Div => KclValue::Number {
                 value: left / right,
+                ty: NumericType::Any,
                 meta,
             },
             BinaryOperator::Mod => KclValue::Number {
                 value: left % right,
+                ty: NumericType::Any,
                 meta,
             },
             BinaryOperator::Pow => KclValue::Number {
                 value: left.powf(right),
+                ty: NumericType::Any,
                 meta,
             },
             BinaryOperator::Neq => KclValue::Bool {
@@ -295,11 +309,15 @@ impl Node<UnaryExpression> {
 
         let value = &self.argument.get_result(exec_state, ctx).await?;
         match value {
-            KclValue::Number { value, meta: _ } => {
+            KclValue::Number { value, ty, meta: _ } => {
                 let meta = vec![Metadata {
                     source_range: self.into(),
                 }];
-                Ok(KclValue::Number { value: -value, meta })
+                Ok(KclValue::Number {
+                    value: -value,
+                    ty: ty.clone(),
+                    meta,
+                })
             }
             KclValue::Int { value, meta: _ } => {
                 let meta = vec![Metadata {
@@ -307,6 +325,7 @@ impl Node<UnaryExpression> {
                 }];
                 Ok(KclValue::Number {
                     value: (-value) as f64,
+                    ty: NumericType::count(),
                     meta,
                 })
             }
@@ -837,18 +856,14 @@ fn article_for(s: &str) -> &'static str {
     }
 }
 
-pub fn parse_number_as_f64(v: &KclValue, source_range: SourceRange) -> Result<f64, KclError> {
-    if let KclValue::Number { value: n, .. } = &v {
-        Ok(*n)
+pub fn parse_number_as_f64(v: &KclValue, source_range: SourceRange) -> Result<(f64, NumericType), KclError> {
+    if let KclValue::Number { value: n, ty, .. } = &v {
+        Ok((*n, ty.clone()))
     } else if let KclValue::Int { value: n, .. } = &v {
-        Ok(*n as f64)
+        Ok((*n as f64, NumericType::count()))
     } else {
         let actual_type = v.human_friendly_type();
-        let article = if actual_type.starts_with(['a', 'e', 'i', 'o', 'u']) {
-            "an"
-        } else {
-            "a"
-        };
+        let article = article_for(actual_type);
         Err(KclError::Semantic(KclErrorDetails {
             source_ranges: vec![source_range],
             message: format!("Expected a number, but found {article} {actual_type}",),
@@ -911,7 +926,7 @@ impl Property {
     fn try_from(
         computed: bool,
         value: LiteralIdentifier,
-        exec_state: &ExecState,
+        exec_state: &mut ExecState,
         sr: SourceRange,
     ) -> Result<Self, KclError> {
         let property_sr = vec![sr];
@@ -924,20 +939,20 @@ impl Property {
                     Ok(Property::String(name.to_string()))
                 } else {
                     // Actually evaluate memory to compute the property.
-                    let prop = exec_state.memory().get(name, property_src)?;
-                    jvalue_to_prop(prop, property_sr, name)
+                    let prop = exec_state.memory().get(name, property_src)?.clone();
+                    jvalue_to_prop(prop, exec_state, sr, name)
                 }
             }
             LiteralIdentifier::Literal(literal) => {
                 let value = literal.value.clone();
                 match value {
-                    LiteralValue::Number(x) => {
-                        if let Some(x) = crate::try_f64_to_usize(x) {
-                            Ok(Property::UInt(x))
+                    LiteralValue::Number { value, .. } => {
+                        if let Some(value) = crate::try_f64_to_usize(value) {
+                            Ok(Property::UInt(value))
                         } else {
                             Err(KclError::Semantic(KclErrorDetails {
                                 source_ranges: property_sr,
-                                message: format!("{x} is not a valid index, indices must be whole numbers >= 0"),
+                                message: format!("{value} is not a valid index, indices must be whole numbers >= 0"),
                             }))
                         }
                     }
@@ -952,16 +967,21 @@ impl Property {
     }
 }
 
-fn jvalue_to_prop(value: &KclValue, property_sr: Vec<SourceRange>, name: &str) -> Result<Property, KclError> {
+fn jvalue_to_prop(
+    value: KclValue,
+    exec_state: &mut ExecState,
+    property_sr: SourceRange,
+    name: &str,
+) -> Result<Property, KclError> {
     let make_err = |message: String| {
         Err::<Property, _>(KclError::Semantic(KclErrorDetails {
-            source_ranges: property_sr,
+            source_ranges: vec![property_sr],
             message,
         }))
     };
     match value {
         KclValue::Int { value:num, meta: _ } => {
-            let maybe_int: Result<usize, _> = (*num).try_into();
+            let maybe_int: Result<usize, _> = (num).try_into();
             if let Ok(uint) = maybe_int {
                 Ok(Property::UInt(uint))
             }
@@ -969,11 +989,13 @@ fn jvalue_to_prop(value: &KclValue, property_sr: Vec<SourceRange>, name: &str) -
                 make_err(format!("'{num}' is negative, so you can't index an array with it"))
             }
         }
-        KclValue::Number{value: num, meta:_} => {
-            let num = *num;
+        KclValue::Number{value: num, ty, meta:_} => {
+            let numeric_ty_result = ty.subtype(&NumericType::count(), num, exec_state.mut_memory(), property_sr)?;
+            let num = numeric_ty_result.lhs;
             if num < 0.0 {
                 return make_err(format!("'{num}' is negative, so you can't index an array with it"))
             }
+            // TODO remove this epsilon thing
             let nearest_int = num.round();
             let delta = num-nearest_int;
             if delta < FLOAT_TO_INT_MAX_DELTA {

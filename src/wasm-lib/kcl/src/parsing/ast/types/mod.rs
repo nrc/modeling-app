@@ -13,7 +13,6 @@ use anyhow::Result;
 use parse_display::{Display, FromStr};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use serde_json::Value as JValue;
 use tower_lsp::lsp_types::{
     CompletionItem, CompletionItemKind, DocumentSymbol, FoldingRange, FoldingRangeKind, Range as LspRange, SymbolKind,
 };
@@ -1867,34 +1866,10 @@ impl Node<Literal> {
 impl Literal {
     pub fn new(value: LiteralValue) -> Node<Self> {
         Node::no_src(Self {
-            raw: JValue::from(value.clone()).to_string(),
+            raw: value.to_string(),
             value,
             digest: None,
         })
-    }
-}
-
-impl From<Node<Literal>> for KclValue {
-    fn from(literal: Node<Literal>) -> Self {
-        let meta = vec![literal.metadata()];
-        match literal.inner.value {
-            LiteralValue::Number(value) => KclValue::Number { value, meta },
-            LiteralValue::String(value) => KclValue::String { value, meta },
-            LiteralValue::Bool(value) => KclValue::Bool { value, meta },
-        }
-    }
-}
-
-impl From<&Node<Literal>> for KclValue {
-    fn from(literal: &Node<Literal>) -> Self {
-        Self::from(literal.to_owned())
-    }
-}
-
-impl From<&BoxNode<Literal>> for KclValue {
-    fn from(literal: &BoxNode<Literal>) -> Self {
-        let b: &Node<Literal> = literal;
-        Self::from(b)
     }
 }
 
@@ -2843,19 +2818,6 @@ pub enum FnArgType {
 pub enum DefaultParamVal {
     KclNone(KclNone),
     Literal(Literal),
-}
-
-// TODO: This should actually take metadata.
-impl From<DefaultParamVal> for KclValue {
-    fn from(v: DefaultParamVal) -> Self {
-        match v {
-            DefaultParamVal::KclNone(kcl_none) => Self::KclNone {
-                value: kcl_none,
-                meta: Default::default(),
-            },
-            DefaultParamVal::Literal(literal) => Self::from_literal(literal.value, Vec::new()),
-        }
-    }
 }
 
 impl DefaultParamVal {

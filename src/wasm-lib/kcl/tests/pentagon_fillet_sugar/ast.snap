@@ -21,7 +21,10 @@ snapshot_kind: text
             "start": 17,
             "type": "Literal",
             "type": "Literal",
-            "value": 200.0
+            "value": {
+              "value": 200.0,
+              "suffix": "None"
+            }
           },
           "start": 0,
           "type": "VariableDeclarator"
@@ -47,7 +50,10 @@ snapshot_kind: text
             "start": 34,
             "type": "Literal",
             "type": "Literal",
-            "value": 100.0
+            "value": {
+              "value": 100.0,
+              "suffix": "None"
+            }
           },
           "start": 21,
           "type": "VariableDeclarator"
@@ -73,7 +79,10 @@ snapshot_kind: text
             "start": 47,
             "type": "Literal",
             "type": "Literal",
-            "value": 80.0
+            "value": {
+              "value": 80.0,
+              "suffix": "None"
+            }
           },
           "start": 38,
           "type": "VariableDeclarator"
@@ -112,7 +121,10 @@ snapshot_kind: text
                   "start": 74,
                   "type": "Literal",
                   "type": "Literal",
-                  "value": 0.0
+                  "value": {
+                    "value": 0.0,
+                    "suffix": "None"
+                  }
                 }
               },
               {
@@ -131,7 +143,10 @@ snapshot_kind: text
                   "start": 90,
                   "type": "Literal",
                   "type": "Literal",
-                  "value": 360.0
+                  "value": {
+                    "value": 360.0,
+                    "suffix": "None"
+                  }
                 }
               },
               {
@@ -181,7 +196,10 @@ snapshot_kind: text
             "start": 130,
             "type": "Literal",
             "type": "Literal",
-            "value": 500.0
+            "value": {
+              "value": 500.0,
+              "suffix": "None"
+            }
           },
           "start": 116,
           "type": "VariableDeclarator"
@@ -235,7 +253,10 @@ snapshot_kind: text
                         "start": 179,
                         "type": "Literal",
                         "type": "Literal",
-                        "value": 0.0
+                        "value": {
+                          "value": 0.0,
+                          "suffix": "None"
+                        }
                       },
                       {
                         "end": 183,
@@ -243,7 +264,10 @@ snapshot_kind: text
                         "start": 182,
                         "type": "Literal",
                         "type": "Literal",
-                        "value": 0.0
+                        "value": {
+                          "value": 0.0,
+                          "suffix": "None"
+                        }
                       }
                     ],
                     "end": 184,
@@ -290,7 +314,10 @@ snapshot_kind: text
                           "start": 215,
                           "type": "Literal",
                           "type": "Literal",
-                          "value": 60.0
+                          "value": {
+                            "value": 60.0,
+                            "suffix": "None"
+                          }
                         }
                       },
                       {
@@ -362,7 +389,10 @@ snapshot_kind: text
                           "start": 276,
                           "type": "Literal",
                           "type": "Literal",
-                          "value": 180.0
+                          "value": {
+                            "value": 180.0,
+                            "suffix": "None"
+                          }
                         }
                       },
                       {
@@ -434,7 +464,10 @@ snapshot_kind: text
                           "start": 338,
                           "type": "Literal",
                           "type": "Literal",
-                          "value": 300.0
+                          "value": {
+                            "value": 300.0,
+                            "suffix": "None"
+                          }
                         }
                       },
                       {
@@ -611,7 +644,10 @@ snapshot_kind: text
                                   "start": 511,
                                   "type": "Literal",
                                   "type": "Literal",
-                                  "value": 2.0
+                                  "value": {
+                                    "value": 2.0,
+                                    "suffix": "None"
+                                  }
                                 },
                                 "start": 494,
                                 "type": "BinaryExpression",
@@ -762,7 +798,10 @@ snapshot_kind: text
                   "start": 579,
                   "type": "Literal",
                   "type": "Literal",
-                  "value": 200.0
+                  "value": {
+                    "value": 200.0,
+                    "suffix": "None"
+                  }
                 },
                 "end": 582,
                 "operator": "-",
@@ -864,7 +903,10 @@ snapshot_kind: text
                           "start": 659,
                           "type": "Literal",
                           "type": "Literal",
-                          "value": 5.0
+                          "value": {
+                            "value": 5.0,
+                            "suffix": "None"
+                          }
                         }
                       },
                       {
@@ -1025,7 +1067,10 @@ snapshot_kind: text
                 "start": 777,
                 "type": "Literal",
                 "type": "Literal",
-                "value": 200.0
+                "value": {
+                  "value": 200.0,
+                  "suffix": "None"
+                }
               },
               {
                 "end": 783,
@@ -1121,7 +1166,10 @@ snapshot_kind: text
                           "start": 857,
                           "type": "Literal",
                           "type": "Literal",
-                          "value": 5.0
+                          "value": {
+                            "value": 5.0,
+                            "suffix": "None"
+                          }
                         }
                       },
                       {

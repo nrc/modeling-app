@@ -5,6 +5,7 @@ use std::{path::PathBuf, sync::Arc};
 use anyhow::Result;
 use async_recursion::async_recursion;
 use indexmap::IndexMap;
+use kcl_value::{NumericType, NumericTypeCtor};
 use kcmc::{
     each_cmd as mcmd,
     ok_response::{output::TakeSnapshot, OkModelingCmdResponse},
@@ -16,21 +17,7 @@ use kittycad_modeling_cmds::length_unit::LengthUnit;
 use parse_display::{Display, FromStr};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-
-type Point2D = kcmc::shared::Point2d<f64>;
-type Point3D = kcmc::shared::Point3d<f64>;
-
-pub use function_param::FunctionParam;
-pub use kcl_value::{KclObjectFields, KclValue};
 use uuid::Uuid;
-
-mod annotations;
-mod artifact;
-pub(crate) mod cache;
-mod cad_op;
-mod exec_ast;
-mod function_param;
-mod kcl_value;
 
 use crate::{
     engine::{EngineManager, ExecutionKind},
@@ -48,9 +35,23 @@ use crate::{
     ExecError, KclErrorWithOutputs, Program,
 };
 
+mod annotations;
+mod artifact;
+pub(crate) mod cache;
+mod cad_op;
+mod exec_ast;
+mod function_param;
+// TODO remove pub
+pub mod kcl_value;
+
 // Re-exports.
 pub use artifact::{Artifact, ArtifactCommand, ArtifactId, ArtifactInner};
 pub use cad_op::Operation;
+pub use function_param::FunctionParam;
+pub use kcl_value::{KclObjectFields, KclValue};
+
+type Point2D = kcmc::shared::Point2d<f64>;
+type Point3D = kcmc::shared::Point3d<f64>;
 
 /// State for executing a program.
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
@@ -301,7 +302,7 @@ impl ProgramMemory {
         }
     }
 
-    pub fn new_env_for_call(&mut self, parent: EnvironmentRef) -> EnvironmentRef {
+    fn new_env_for_call(&mut self, parent: EnvironmentRef) -> EnvironmentRef {
         let new_env_ref = EnvironmentRef(self.environments.len());
         let new_env = Environment::new(parent);
         self.environments.push(new_env);
@@ -309,12 +310,20 @@ impl ProgramMemory {
     }
 
     /// Add to the program memory in the current scope.
-    pub fn add(&mut self, key: &str, value: KclValue, source_range: SourceRange) -> Result<(), KclError> {
+    pub fn add(&mut self, key: &str, mut value: KclValue, source_range: SourceRange) -> Result<(), KclError> {
         if self.environments[self.current_env.index()].contains_key(key) {
             return Err(KclError::ValueAlreadyDefined(KclErrorDetails {
                 message: format!("Cannot redefine `{}`", key),
                 source_ranges: vec![source_range],
             }));
+        }
+
+        if let KclValue::Number {
+            ty: NumericType::Default { ref mut src, .. },
+            ..
+        } = value
+        {
+            *src = Some((key.to_owned(), self.current_env));
         }
 
         self.environments[self.current_env.index()].insert(key.to_string(), value);
@@ -326,6 +335,19 @@ impl ProgramMemory {
         self.environments[self.current_env.index()].insert(tag.to_string(), KclValue::TagIdentifier(Box::new(value)));
 
         Ok(())
+    }
+
+    pub fn set_numeric_type(&mut self, key: &str, env: EnvironmentRef, new_ty: NumericTypeCtor) {
+        match self.environments[env.index()].bindings.get_mut(key) {
+            Some(KclValue::Number { ref mut ty, .. }) => match ty {
+                NumericType::Any | NumericType::Default { .. } => {
+                    *ty = NumericType::Known(new_ty);
+                }
+                _ => panic!("Attempt to set units, but units are already known"),
+            },
+            Some(_) => panic!("Not a number"),
+            None => panic!("Variable not found"),
+        }
     }
 
     /// Get a value from the program memory.
@@ -411,16 +433,28 @@ impl Environment {
         Self {
             // Prelude
             bindings: IndexMap::from([
-                ("ZERO".to_string(), KclValue::from_number(0.0, NO_META)),
-                ("QUARTER_TURN".to_string(), KclValue::from_number(90.0, NO_META)),
-                ("HALF_TURN".to_string(), KclValue::from_number(180.0, NO_META)),
-                ("THREE_QUARTER_TURN".to_string(), KclValue::from_number(270.0, NO_META)),
+                (
+                    "ZERO".to_string(),
+                    KclValue::from_number(0.0, NumericType::degrees(), NO_META),
+                ),
+                (
+                    "QUARTER_TURN".to_string(),
+                    KclValue::from_number(90.0, NumericType::degrees(), NO_META),
+                ),
+                (
+                    "HALF_TURN".to_string(),
+                    KclValue::from_number(180.0, NumericType::degrees(), NO_META),
+                ),
+                (
+                    "THREE_QUARTER_TURN".to_string(),
+                    KclValue::from_number(270.0, NumericType::degrees(), NO_META),
+                ),
             ]),
             parent: None,
         }
     }
 
-    pub fn new(parent: EnvironmentRef) -> Self {
+    fn new(parent: EnvironmentRef) -> Self {
         Self {
             bindings: IndexMap::new(),
             parent: Some(parent),
@@ -2500,7 +2534,7 @@ impl ExecutorContext {
     ) -> Result<KclValue, KclError> {
         let item = match init {
             Expr::None(none) => KclValue::from(none),
-            Expr::Literal(literal) => KclValue::from(literal),
+            Expr::Literal(literal) => KclValue::from_literal(literal, &exec_state.mod_local.settings),
             Expr::TagDeclarator(tag) => tag.execute(exec_state).await?,
             Expr::Identifier(identifier) => {
                 let value = exec_state.memory().get(&identifier.name, identifier.into())?.clone();
@@ -2645,6 +2679,7 @@ fn assign_args_to_params(
     function_expression: NodeRef<'_, FunctionExpression>,
     args: Vec<Arg>,
     mut fn_memory: ProgramMemory,
+    settings: &MetaSettings,
 ) -> Result<ProgramMemory, KclError> {
     let num_args = function_expression.number_of_args();
     let (min_params, max_params) = num_args.into_inner();
@@ -2677,7 +2712,7 @@ fn assign_args_to_params(
                 // then it's fine, the user doesn't need to supply it.
                 fn_memory.add(
                     &param.identifier.name,
-                    default_val.clone().into(),
+                    KclValue::from_default_param_val(default_val, settings),
                     (&param.identifier).into(),
                 )?;
             } else {
@@ -2694,6 +2729,7 @@ fn assign_args_to_params_kw(
     function_expression: NodeRef<'_, FunctionExpression>,
     mut args: crate::std::args::KwArgs,
     mut fn_memory: ProgramMemory,
+    settings: &MetaSettings,
 ) -> Result<ProgramMemory, KclError> {
     // Add the arguments to the memory.  A new call frame should have already
     // been created.
@@ -2704,7 +2740,7 @@ fn assign_args_to_params_kw(
             let arg_val = match arg {
                 Some(arg) => arg.value.clone(),
                 None => match param.default_value {
-                    Some(ref default_val) => KclValue::from(default_val.clone()),
+                    Some(ref default_val) => KclValue::from_default_param_val(default_val, settings),
                     None => {
                         return Err(KclError::Semantic(KclErrorDetails {
                             source_ranges,
@@ -2756,7 +2792,7 @@ pub(crate) async fn call_user_defined_function(
     let mut body_memory = memory.clone();
     let body_env = body_memory.new_env_for_call(memory.current_env);
     body_memory.current_env = body_env;
-    let fn_memory = assign_args_to_params(function_expression, args, body_memory)?;
+    let fn_memory = assign_args_to_params(function_expression, args, body_memory, &exec_state.mod_local.settings)?;
 
     // Execute the function body using the memory we just created.
     let (result, fn_memory) = {
@@ -2786,7 +2822,7 @@ pub(crate) async fn call_user_defined_function_kw(
     let mut body_memory = memory.clone();
     let body_env = body_memory.new_env_for_call(memory.current_env);
     body_memory.current_env = body_env;
-    let fn_memory = assign_args_to_params_kw(function_expression, args, body_memory)?;
+    let fn_memory = assign_args_to_params_kw(function_expression, args, body_memory, &exec_state.mod_local.settings)?;
 
     // Execute the function body using the memory we just created.
     let (result, fn_memory) = {
@@ -3706,7 +3742,7 @@ let w = f() + f()
                 digest: None,
             });
             let args = args.into_iter().map(Arg::synthetic).collect();
-            let actual = assign_args_to_params(func_expr, args, ProgramMemory::new());
+            let actual = assign_args_to_params(func_expr, args, ProgramMemory::new(), &MetaSettings::default());
             assert_eq!(
                 actual, expected,
                 "failed test '{test_name}':\ngot {actual:?}\nbut expected\n{expected:?}"

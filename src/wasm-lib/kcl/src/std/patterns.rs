@@ -19,9 +19,10 @@ use uuid::Uuid;
 use super::args::Arg;
 use crate::{
     errors::{KclError, KclErrorDetails},
+    exec::ProgramMemory,
     execution::{
-        ExecState, FunctionParam, Geometries, Geometry, KclObjectFields, KclValue, Point2d, Point3d, Sketch, SketchSet,
-        Solid, SolidSet,
+        kcl_value::NumericType, ExecState, FunctionParam, Geometries, Geometry, KclObjectFields, KclValue, Point2d,
+        Point3d, Sketch, SketchSet, Solid, SolidSet,
     },
     std::Args,
     SourceRange,
@@ -460,12 +461,13 @@ async fn make_transform<'a, T: GeometryTrait>(
 
     transforms
         .into_iter()
-        .map(|obj| transform_from_obj_fields::<T>(obj, source_ranges.clone()))
+        .map(|obj| transform_from_obj_fields::<T>(obj, exec_state.mut_memory(), source_ranges.clone()))
         .collect()
 }
 
 fn transform_from_obj_fields<T: GeometryTrait>(
     transform: KclObjectFields,
+    memory: &mut ProgramMemory,
     source_ranges: Vec<SourceRange>,
 ) -> Result<Transform, KclError> {
     // Apply defaults to the transform.
@@ -505,12 +507,13 @@ fn transform_from_obj_fields<T: GeometryTrait>(
         }
         if let Some(angle) = rot.get("angle") {
             match angle {
-                KclValue::Number { value: number, meta: _ } => {
-                    rotation.angle = Angle::from_degrees(*number);
+                KclValue::Number { value, ty, meta: _ } => {
+                    let numty_result = ty.subtype(&NumericType::degrees(), *value, memory, source_ranges[0].clone())?;
+                    rotation.angle = Angle::from_degrees(numty_result.lhs);
                 }
                 _ => {
                     return Err(KclError::Semantic(KclErrorDetails {
-                        message: "The 'rotation.angle' key must be a number (of degrees)".to_string(),
+                        message: "The 'rotation.angle' key must be a number (an angle)".to_string(),
                         source_ranges: source_ranges.clone(),
                     }));
                 }
@@ -645,6 +648,8 @@ impl GeometryTrait for Box<Solid> {
 
 #[cfg(test)]
 mod tests {
+    use crate::execution::kcl_value::NumericType;
+
     use super::*;
 
     #[test]
@@ -653,14 +658,17 @@ mod tests {
             value: vec![
                 KclValue::Number {
                     value: 1.1,
+                    ty: NumericType::degrees(),
                     meta: Default::default(),
                 },
                 KclValue::Number {
                     value: 2.2,
+                    ty: NumericType::degrees(),
                     meta: Default::default(),
                 },
                 KclValue::Number {
                     value: 3.3,
+                    ty: NumericType::degrees(),
                     meta: Default::default(),
                 },
             ],

@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     errors::KclError,
-    execution::{ExecState, KclValue},
+    execution::{kcl_value::NumericType, ExecState, KclValue, Metadata},
     std::Args,
 };
 
@@ -27,11 +27,20 @@ pub async fn polar(_exec_state: &mut ExecState, args: Args) -> Result<KclValue, 
     let data: PolarCoordsData = args.get_data()?;
     let result = inner_polar(&data)?;
 
-    args.make_user_val_from_f64_array(result.to_vec())
+    Ok(KclValue::Array {
+        value: vec![
+            // TODO units
+            args.make_user_val_from_f64(result[0], NumericType::internal_length()),
+            args.make_user_val_from_f64(result[1], NumericType::internal_length()),
+        ],
+        meta: vec![Metadata {
+            source_range: args.source_range,
+        }],
+    })
 }
 
 /// Convert polar/sphere (azimuth, elevation, distance) coordinates to
-/// cartesian (x/y/z grid) coordinates.
+/// cartesian (x/y grid) coordinates.
 ///
 /// ```no_run
 /// exampleSketch = startSketchOn('XZ')
