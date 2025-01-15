@@ -19,8 +19,11 @@ use crate::{
     },
 };
 
-use super::cad_op::{OpArg, Operation};
 use super::kcl_value::NumericType;
+use super::{
+    cad_op::{OpArg, Operation},
+    Type, Typed,
+};
 
 const FLOAT_TO_INT_MAX_DELTA: f64 = 0.01;
 
@@ -127,7 +130,7 @@ impl Node<MemberExpression> {
             (KclValue::Solid(solid), Property::String(prop)) if prop == "sketch" => Ok(KclValue::Sketch {
                 value: Box::new(solid.sketch),
             }),
-            (KclValue::Sketch { value: sk }, Property::String(prop)) if prop == "tags" => Ok(KclValue::Object {
+            (KclValue::Sketch { value: sk, .. }, Property::String(prop)) if prop == "tags" => Ok(KclValue::Object {
                 meta: vec![Metadata {
                     source_range: SourceRange::from(self.clone()),
                 }],
@@ -678,7 +681,9 @@ fn update_memory_for_tags_of_geometry(result: &mut KclValue, exec_state: &mut Ex
     // TODO: This could probably be done in a better way, but as of now this was my only idea
     // and it works.
     match result {
-        KclValue::Sketch { value: ref mut sketch } => {
+        KclValue::Sketch {
+            value: ref mut sketch, ..
+        } => {
             for (_, tag) in sketch.tags.iter() {
                 exec_state.mut_memory().update_tag(&tag.value, tag.clone())?;
             }
@@ -784,18 +789,12 @@ impl Node<ArrayRangeExpression> {
         let start = ctx
             .execute_expr(&self.start_element, exec_state, &metadata, StatementKind::Expression)
             .await?;
-        let start = start.as_int().ok_or(KclError::Semantic(KclErrorDetails {
-            source_ranges: vec![self.into()],
-            message: format!("Expected int but found {}", start.human_friendly_type()),
-        }))?;
+        let start = i64::ty_check(&start, &Type::Int, exec_state.mut_memory())?;
         let metadata = Metadata::from(&self.end_element);
         let end = ctx
             .execute_expr(&self.end_element, exec_state, &metadata, StatementKind::Expression)
             .await?;
-        let end = end.as_int().ok_or(KclError::Semantic(KclErrorDetails {
-            source_ranges: vec![self.into()],
-            message: format!("Expected int but found {}", end.human_friendly_type()),
-        }))?;
+        let end = i64::ty_check(&end, &Type::Int, exec_state.mut_memory())?;
 
         if end < start {
             return Err(KclError::Semantic(KclErrorDetails {

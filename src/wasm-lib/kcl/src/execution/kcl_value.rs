@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt};
 
 use anyhow::Result;
 use schemars::JsonSchema;
@@ -147,8 +147,8 @@ impl From<KclValue> for Vec<SourceRange> {
             KclValue::TagIdentifier(t) => to_vec_sr(&t.meta),
             KclValue::Solid(e) => to_vec_sr(&e.meta),
             KclValue::Solids { value } => value.iter().flat_map(|eg| to_vec_sr(&eg.meta)).collect(),
-            KclValue::Sketch { value } => to_vec_sr(&value.meta),
-            KclValue::Sketches { value } => value.iter().flat_map(|eg| to_vec_sr(&eg.meta)).collect(),
+            KclValue::Sketch { value, .. } => to_vec_sr(&value.meta),
+            KclValue::Sketches { value, .. } => value.iter().flat_map(|eg| to_vec_sr(&eg.meta)).collect(),
             KclValue::Helix(e) => to_vec_sr(&e.meta),
             KclValue::ImportedGeometry(i) => to_vec_sr(&i.meta),
             KclValue::Function { meta, .. } => to_vec_sr(&meta),
@@ -226,27 +226,27 @@ impl NumericType {
     }
 
     pub fn mm() -> Self {
-        NumericType::Known(NumericTypeCtor::Length(UnitAngle::Mm))
+        NumericType::Known(NumericTypeCtor::Length(UnitLen::Mm))
     }
 
     pub fn cm() -> Self {
-        NumericType::Known(NumericTypeCtor::Length(UnitAngle::Cm))
+        NumericType::Known(NumericTypeCtor::Length(UnitLen::Cm))
     }
 
     pub fn m() -> Self {
-        NumericType::Known(NumericTypeCtor::Length(UnitAngle::M))
+        NumericType::Known(NumericTypeCtor::Length(UnitLen::M))
     }
 
     pub fn inches() -> Self {
-        NumericType::Known(NumericTypeCtor::Length(UnitAngle::Inches))
+        NumericType::Known(NumericTypeCtor::Length(UnitLen::Inches))
     }
 
     pub fn feet() -> Self {
-        NumericType::Known(NumericTypeCtor::Length(UnitAngle::Feet))
+        NumericType::Known(NumericTypeCtor::Length(UnitLen::Feet))
     }
 
     pub fn yards() -> Self {
-        NumericType::Known(NumericTypeCtor::Length(UnitAngle::Yards))
+        NumericType::Known(NumericTypeCtor::Length(UnitLen::Yards))
     }
 
     pub fn count() -> Self {
@@ -254,11 +254,11 @@ impl NumericType {
     }
 
     pub fn internal_length() -> Self {
-        NumericType::Known(NumericTypeCtor::Length(UnitLen::Mm))
+        Self::mm()
     }
 
     pub fn internal_angle() -> Self {
-        NumericType::Known(NumericTypeCtor::Angle(UnitAngle::Degrees))
+        Self::degrees()
     }
 
     // other is the type of a formal parameter or similar
@@ -633,6 +633,19 @@ impl TryFrom<NumericSuffix> for UnitLen {
     }
 }
 
+impl fmt::Display for UnitLen {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            UnitLen::Mm => write!(f, "mm"),
+            UnitLen::Cm => write!(f, "cm"),
+            UnitLen::M => write!(f, "m"),
+            UnitLen::Inches => write!(f, "in"),
+            UnitLen::Feet => write!(f, "ft"),
+            UnitLen::Yards => write!(f, "yd"),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, ts_rs::TS, JsonSchema, Eq)]
 #[ts(export)]
 #[serde(tag = "type")]
@@ -666,8 +679,21 @@ impl TryFrom<NumericSuffix> for UnitAngle {
     }
 }
 
+impl fmt::Display for UnitAngle {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            UnitAngle::Degrees => write!(f, "deg"),
+            UnitAngle::Radians => write!(f, "rad"),
+        }
+    }
+}
+
 fn to_vec_sr(meta: &[Metadata]) -> Vec<SourceRange> {
     meta.iter().map(|m| m.source_range).collect()
+}
+
+pub(super) fn to_sr(meta: &[Metadata]) -> SourceRange {
+    meta[0].source_range
 }
 
 impl From<&KclValue> for Vec<SourceRange> {
@@ -677,8 +703,8 @@ impl From<&KclValue> for Vec<SourceRange> {
             KclValue::TagIdentifier(t) => to_vec_sr(&t.meta),
             KclValue::Solid(e) => to_vec_sr(&e.meta),
             KclValue::Solids { value } => value.iter().flat_map(|eg| to_vec_sr(&eg.meta)).collect(),
-            KclValue::Sketch { value } => to_vec_sr(&value.meta),
-            KclValue::Sketches { value } => value.iter().flat_map(|eg| to_vec_sr(&eg.meta)).collect(),
+            KclValue::Sketch { value, .. } => to_vec_sr(&value.meta),
+            KclValue::Sketches { value, .. } => value.iter().flat_map(|eg| to_vec_sr(&eg.meta)).collect(),
             KclValue::Helix(x) => to_vec_sr(&x.meta),
             KclValue::ImportedGeometry(i) => to_vec_sr(&i.meta),
             KclValue::Function { meta, .. } => to_vec_sr(meta),
@@ -711,8 +737,8 @@ impl KclValue {
             KclValue::TagDeclarator(x) => vec![x.metadata()],
             KclValue::Plane(x) => x.meta.clone(),
             KclValue::Face(x) => x.meta.clone(),
-            KclValue::Sketch { value } => value.meta.clone(),
-            KclValue::Sketches { value } => value.iter().flat_map(|sketch| &sketch.meta).copied().collect(),
+            KclValue::Sketch { value, .. } => value.meta.clone(),
+            KclValue::Sketches { value, .. } => value.iter().flat_map(|sketch| &sketch.meta).copied().collect(),
             KclValue::Solid(x) => x.meta.clone(),
             KclValue::Solids { value } => value.iter().flat_map(|sketch| &sketch.meta).copied().collect(),
             KclValue::Helix(x) => x.meta.clone(),
@@ -814,21 +840,21 @@ impl KclValue {
         }
     }
 
-    pub(crate) fn as_usize(&self) -> Option<usize> {
-        match self {
-            KclValue::Int { value, .. } if *value > 0 => Some(*value as usize),
-            KclValue::Number { value, .. } => crate::try_f64_to_usize(*value),
-            _ => None,
-        }
-    }
+    // pub(crate) fn as_usize(&self) -> Option<usize> {
+    //     match self {
+    //         KclValue::Int { value, .. } if *value > 0 => Some(*value as usize),
+    //         KclValue::Number { value, .. } => crate::try_f64_to_usize(*value),
+    //         _ => None,
+    //     }
+    // }
 
-    pub fn as_int(&self) -> Option<i64> {
-        match self {
-            KclValue::Int { value, .. } => Some(*value),
-            KclValue::Number { value, .. } => crate::try_f64_to_i64(*value),
-            _ => None,
-        }
-    }
+    // pub fn as_int(&self) -> Option<i64> {
+    //     match self {
+    //         KclValue::Int { value, .. } => Some(*value),
+    //         KclValue::Number { value, .. } => crate::try_f64_to_i64(*value),
+    //         _ => None,
+    //     }
+    // }
 
     pub fn as_object(&self) -> Option<&KclObjectFields> {
         if let KclValue::Object { value, meta: _ } = &self {
@@ -854,22 +880,20 @@ impl KclValue {
         }
     }
 
-    pub fn as_array(&self) -> Option<&[KclValue]> {
-        if let KclValue::Array { value, meta: _ } = &self {
+    pub fn as_string(self) -> Option<String> {
+        if let KclValue::String { value, .. } = self {
             Some(value)
         } else {
             None
         }
     }
 
-    pub fn as_point2d(&self) -> Option<[f64; 2]> {
-        let arr = self.as_array()?;
-        if arr.len() != 2 {
-            return None;
+    pub fn as_array(&self) -> Option<&[KclValue]> {
+        if let KclValue::Array { value, meta: _ } = &self {
+            Some(value)
+        } else {
+            None
         }
-        let x = arr[0].as_f64()?;
-        let y = arr[1].as_f64()?;
-        Some([x, y])
     }
 
     pub fn as_uuid(&self) -> Option<uuid::Uuid> {
@@ -896,13 +920,27 @@ impl KclValue {
         }
     }
 
-    pub fn as_f64(&self) -> Option<f64> {
+    pub(super) fn as_f64_untyped(&self) -> Option<f64> {
         if let KclValue::Number { value, .. } = &self {
             Some(*value)
-        } else if let KclValue::Int { value, .. } = &self {
-            Some(*value as f64)
         } else {
             None
+        }
+    }
+
+    pub fn as_u32_untyped(&self) -> Option<u32> {
+        match self {
+            KclValue::Int { value, .. } => Some(*value as u32),
+            KclValue::Number { value, .. } => crate::try_f64_to_u32(*value),
+            _ => None,
+        }
+    }
+
+    pub fn as_i64_untyped(&self) -> Option<i64> {
+        match self {
+            KclValue::Int { value, .. } => Some(*value),
+            KclValue::Number { value, .. } => crate::try_f64_to_i64(*value),
+            _ => None,
         }
     }
 
@@ -914,21 +952,21 @@ impl KclValue {
         }
     }
 
-    /// If this value fits in a u32, return it.
-    pub fn get_u32(&self, source_ranges: Vec<SourceRange>) -> Result<u32, KclError> {
-        let u = self.as_int().and_then(|n| u64::try_from(n).ok()).ok_or_else(|| {
-            KclError::Semantic(KclErrorDetails {
-                message: "Expected an integer >= 0".to_owned(),
-                source_ranges: source_ranges.clone(),
-            })
-        })?;
-        u32::try_from(u).map_err(|_| {
-            KclError::Semantic(KclErrorDetails {
-                message: "Number was too big".to_owned(),
-                source_ranges,
-            })
-        })
-    }
+    // /// If this value fits in a u32, return it.
+    // fn get_u32(&self, source_ranges: Vec<SourceRange>) -> Result<u32, KclError> {
+    //     let u = self.as_int().and_then(|n| u64::try_from(n).ok()).ok_or_else(|| {
+    //         KclError::Semantic(KclErrorDetails {
+    //             message: "Expected an integer >= 0".to_owned(),
+    //             source_ranges: source_ranges.clone(),
+    //         })
+    //     })?;
+    //     u32::try_from(u).map_err(|_| {
+    //         KclError::Semantic(KclErrorDetails {
+    //             message: "Number was too big".to_owned(),
+    //             source_ranges,
+    //         })
+    //     })
+    // }
 
     /// If this value is of type function, return it.
     pub fn get_function(&self) -> Option<FnAsArg<'_>> {

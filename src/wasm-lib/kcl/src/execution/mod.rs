@@ -1,6 +1,6 @@
 //! The executor for the AST.
 
-use std::{path::PathBuf, sync::Arc};
+use std::{fmt, path::PathBuf, sync::Arc};
 
 use anyhow::Result;
 use async_recursion::async_recursion;
@@ -49,6 +49,172 @@ pub use artifact::{Artifact, ArtifactCommand, ArtifactId, ArtifactInner};
 pub use cad_op::Operation;
 pub use function_param::FunctionParam;
 pub use kcl_value::{KclObjectFields, KclValue};
+
+// TODO move somewhere else
+#[derive(Debug, Clone)]
+pub enum Type {
+    Any,
+    Number(NumericType),
+    Int,
+    String,
+    Bool,
+}
+
+impl fmt::Display for Type {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Type::Any => write!(f, "any"),
+            Type::Number(nt) => {
+                write!(f, "number")?;
+                if let NumericType::Known(ntc) = nt {
+                    match ntc {
+                        NumericTypeCtor::Count => write!(f, "(_)")?,
+                        NumericTypeCtor::Length(l) => write!(f, "({l})")?,
+                        NumericTypeCtor::Angle(a) => write!(f, "({a})")?,
+                    }
+                }
+                Ok(())
+            }
+            Type::Int => write!(f, "integer"),
+            Type::String => write!(f, "string"),
+            Type::Bool => write!(f, "boolean"),
+        }
+    }
+}
+
+impl From<NumericType> for Type {
+    fn from(value: NumericType) -> Self {
+        Type::Number(value)
+    }
+}
+
+pub struct TyErr;
+
+impl From<KclError> for TyErr {
+    fn from(_e: KclError) -> Self {
+        TyErr
+    }
+}
+
+fn ty_check(value: &KclValue, ty: &Type, mem: &mut ProgramMemory) -> Result<KclValue, KclError> {
+    match ty {
+        Type::Any => Ok(value.clone()),
+        Type::Bool => match value {
+            KclValue::Bool { .. } => Ok(value.clone()),
+            _ => Err(ty_err(value, ty)),
+        },
+        Type::Number(t @ NumericType::Known(ctor)) => match (ctor, value) {
+            (NumericTypeCtor::Count, KclValue::Int { .. }) => Ok(value.clone()),
+            (_, KclValue::Number { value, ty, meta }) => {
+                let adjust = ty.subtype(t, *value, mem, kcl_value::to_sr(meta))?;
+                Ok(KclValue::Number {
+                    value: adjust.lhs,
+                    ty: adjust.result_type,
+                    meta: meta.clone(),
+                })
+            }
+            _ => Err(ty_err(value, ty)),
+        },
+        Type::Number(NumericType::Default { .. }) => todo!(),
+        Type::Number(_) => unreachable!(),
+        Type::Int => match value {
+            KclValue::Int { .. } => Ok(value.clone()),
+            KclValue::Number {
+                value: n,
+                ty: nty,
+                meta,
+            } => {
+                let adjust = nty.subtype(&NumericType::count(), *n, mem, kcl_value::to_sr(meta))?;
+                Ok(KclValue::Int {
+                    value: crate::try_f64_to_i64(adjust.lhs).ok_or_else(|| ty_err(value, ty))?,
+                    meta: meta.clone(),
+                })
+            }
+            _ => Err(ty_err(value, ty)),
+        },
+        Type::String => match value {
+            KclValue::String { .. } => Ok(value.clone()),
+            _ => Err(ty_err(value, ty)),
+        },
+    }
+}
+
+fn ty_err(value: &KclValue, ty: &Type) -> KclError {
+    KclError::Semantic(KclErrorDetails {
+        source_ranges: value.into(),
+        message: format!("Expected {ty}, but found {}", value.human_friendly_type()),
+    })
+}
+
+pub(crate) trait Typed: Sized {
+    fn ty_check(value: &KclValue, ty: &Type, mem: &mut ProgramMemory) -> Result<Self, KclError>;
+}
+
+impl Typed for KclValue {
+    fn ty_check(value: &KclValue, ty: &Type, mem: &mut ProgramMemory) -> Result<Self, KclError> {
+        ty_check(value, ty, mem)
+    }
+}
+
+impl Typed for f64 {
+    fn ty_check(value: &KclValue, ty: &Type, mem: &mut ProgramMemory) -> Result<Self, KclError> {
+        match ty {
+            Type::Any | Type::Number(_) | Type::Int => {
+                let val = ty_check(value, ty, mem)?;
+                val.as_f64_untyped().ok_or_else(|| ty_err(value, ty))
+            }
+            _ => unreachable!(),
+        }
+    }
+}
+
+impl Typed for i64 {
+    fn ty_check(value: &KclValue, ty: &Type, mem: &mut ProgramMemory) -> Result<Self, KclError> {
+        match ty {
+            Type::Any | Type::Int => {
+                let val = ty_check(value, ty, mem)?;
+                val.as_i64_untyped().ok_or_else(|| ty_err(value, ty))
+            }
+            _ => unreachable!(),
+        }
+    }
+}
+
+impl Typed for u32 {
+    fn ty_check(value: &KclValue, ty: &Type, mem: &mut ProgramMemory) -> Result<Self, KclError> {
+        match ty {
+            Type::Any | Type::Int => {
+                let val = ty_check(value, ty, mem)?;
+                val.as_u32_untyped().ok_or_else(|| ty_err(value, ty))
+            }
+            _ => unreachable!(),
+        }
+    }
+}
+
+impl Typed for String {
+    fn ty_check(value: &KclValue, ty: &Type, mem: &mut ProgramMemory) -> Result<Self, KclError> {
+        match ty {
+            Type::Any | Type::String => {
+                let val = ty_check(value, ty, mem)?;
+                val.as_string().ok_or_else(|| ty_err(value, ty))
+            }
+            _ => unreachable!(),
+        }
+    }
+}
+
+impl Typed for bool {
+    fn ty_check(value: &KclValue, ty: &Type, mem: &mut ProgramMemory) -> Result<Self, KclError> {
+        match ty {
+            Type::Any | Type::Bool => {
+                let val = ty_check(value, ty, mem)?;
+                val.as_bool().ok_or_else(|| ty_err(value, ty))
+            }
+            _ => unreachable!(),
+        }
+    }
+}
 
 type Point2D = kcmc::shared::Point2d<f64>;
 type Point3D = kcmc::shared::Point3d<f64>;
@@ -343,6 +509,7 @@ impl ProgramMemory {
                 NumericType::Any | NumericType::Default { .. } => {
                     *ty = NumericType::Known(new_ty);
                 }
+                // The caller should only call this function on variables with unknown units.
                 _ => panic!("Attempt to set units, but units are already known"),
             },
             Some(_) => panic!("Not a number"),
@@ -3304,21 +3471,30 @@ let shape = layer() |> patternTransform(10, transform, %)
     async fn test_math_execute_with_functions() {
         let ast = r#"const myVar = 2 + min(100, -1 + legLen(5, 3))"#;
         let (_, _, exec_state) = parse_execute(ast).await.unwrap();
-        assert_eq!(5.0, mem_get_json(exec_state.memory(), "myVar").as_f64().unwrap());
+        assert_eq!(
+            5.0,
+            mem_get_json(exec_state.memory(), "myVar").as_f64_untyped().unwrap()
+        );
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn test_math_execute() {
         let ast = r#"const myVar = 1 + 2 * (3 - 4) / -5 + 6"#;
         let (_, _, exec_state) = parse_execute(ast).await.unwrap();
-        assert_eq!(7.4, mem_get_json(exec_state.memory(), "myVar").as_f64().unwrap());
+        assert_eq!(
+            7.4,
+            mem_get_json(exec_state.memory(), "myVar").as_f64_untyped().unwrap()
+        );
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn test_math_execute_start_negative() {
         let ast = r#"const myVar = -5 + 6"#;
         let (_, _, exec_state) = parse_execute(ast).await.unwrap();
-        assert_eq!(1.0, mem_get_json(exec_state.memory(), "myVar").as_f64().unwrap());
+        assert_eq!(
+            1.0,
+            mem_get_json(exec_state.memory(), "myVar").as_f64_untyped().unwrap()
+        );
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -3327,7 +3503,7 @@ let shape = layer() |> patternTransform(10, transform, %)
         let (_, _, exec_state) = parse_execute(ast).await.unwrap();
         assert_eq!(
             std::f64::consts::TAU,
-            mem_get_json(exec_state.memory(), "myVar").as_f64().unwrap()
+            mem_get_json(exec_state.memory(), "myVar").as_f64_untyped().unwrap()
         );
     }
 
@@ -3335,7 +3511,10 @@ let shape = layer() |> patternTransform(10, transform, %)
     async fn test_math_define_decimal_without_leading_zero() {
         let ast = r#"let thing = .4 + 7"#;
         let (_, _, exec_state) = parse_execute(ast).await.unwrap();
-        assert_eq!(7.4, mem_get_json(exec_state.memory(), "thing").as_f64().unwrap());
+        assert_eq!(
+            7.4,
+            mem_get_json(exec_state.memory(), "thing").as_f64_untyped().unwrap()
+        );
     }
 
     #[tokio::test(flavor = "multi_thread")]

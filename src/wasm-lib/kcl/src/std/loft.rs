@@ -9,7 +9,7 @@ use kittycad_modeling_cmds as kcmc;
 
 use crate::{
     errors::{KclError, KclErrorDetails},
-    execution::{ExecState, KclValue, Sketch, Solid},
+    execution::{kcl_value::NumericType, ExecState, KclValue, Sketch, Solid, Type},
     std::{extrude::do_post_extrude, fillet::default_tolerance, Args},
 };
 
@@ -18,17 +18,18 @@ const DEFAULT_V_DEGREE: u32 = 2;
 /// Create a 3D surface or solid by interpolating between two or more sketches.
 pub async fn loft(exec_state: &mut ExecState, args: Args) -> Result<KclValue, KclError> {
     let sketches = args.get_unlabeled_kw_arg("sketches")?;
-    let v_degree: NonZeroU32 = args
-        .get_kw_arg_opt("vDegree")
-        .unwrap_or(NonZeroU32::new(DEFAULT_V_DEGREE).unwrap());
+    let v_degree = args
+        .get_kw_arg_opt_typed("vDegree", &Type::Int, exec_state.mut_memory())
+        .unwrap_or(DEFAULT_V_DEGREE);
     // Attempt to approximate rational curves (such as arcs) using a bezier.
     // This will remove banding around interpolations between arcs and non-arcs.  It may produce errors in other scenarios
     // Over time, this field won't be necessary.
     let bez_approximate_rational = args.get_kw_arg_opt("bezApproximateRational").unwrap_or(false);
     // This can be set to override the automatically determined topological base curve, which is usually the first section encountered.
-    let base_curve_index: Option<u32> = args.get_kw_arg_opt("baseCurveIndex");
+    let base_curve_index = args.get_kw_arg_opt_typed("baseCurveIndex", &Type::Int, exec_state.mut_memory());
     // Tolerance for the loft operation.
-    let tolerance: Option<f64> = args.get_kw_arg_opt("tolerance");
+    let tolerance: Option<f64> =
+        args.get_kw_arg_opt_typed("tolerance", &NumericType::count().into(), exec_state.mut_memory());
 
     let solid = inner_loft(
         sketches,
@@ -124,7 +125,7 @@ pub async fn loft(exec_state: &mut ExecState, args: Args) -> Result<KclValue, Kc
 }]
 async fn inner_loft(
     sketches: Vec<Sketch>,
-    v_degree: NonZeroU32,
+    v_degree: u32,
     bez_approximate_rational: bool,
     base_curve_index: Option<u32>,
     tolerance: Option<f64>,
@@ -141,6 +142,14 @@ async fn inner_loft(
             source_ranges: vec![args.source_range],
         }));
     }
+
+    if v_degree == 0 {
+        return Err(KclError::Semantic(KclErrorDetails {
+            message: "Degree of interpolation (vDegree) argument to loft must be greater than zero.".to_owned(),
+            source_ranges: vec![args.source_range],
+        }));
+    }
+    let v_degree = NonZeroU32::new(v_degree).unwrap();
 
     let id = exec_state.next_uuid();
     args.batch_modeling_cmd(

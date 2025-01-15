@@ -1,4 +1,4 @@
-use std::{any::type_name, collections::HashMap, num::NonZeroU32};
+use std::{any::type_name, collections::HashMap};
 
 use anyhow::Result;
 use kcmc::{websocket::OkWebSocketResponseData, ModelingCmd};
@@ -7,9 +7,10 @@ use kittycad_modeling_cmds as kcmc;
 use super::shapes::PolygonType;
 use crate::{
     errors::{KclError, KclErrorDetails},
+    exec::ProgramMemory,
     execution::{
-        kcl_value::NumericType, ExecState, ExecutorContext, ExtrudeSurface, Helix, KclObjectFields, KclValue, Metadata,
-        Sketch, SketchSet, SketchSurface, Solid, SolidSet, TagIdentifier,
+        kcl_value::NumericType, ty_check, ExecState, ExecutorContext, ExtrudeSurface, Helix, KclObjectFields, KclValue,
+        Metadata, Sketch, SketchSet, SketchSurface, Solid, SolidSet, TagIdentifier, Type, Typed,
     },
     parsing::ast::types::TagNode,
     source_range::SourceRange,
@@ -120,6 +121,17 @@ impl Args {
             .labeled
             .get(label)
             .and_then(|arg| T::from_kcl_val(&arg.value))
+    }
+
+    /// Get a keyword argument. If not set, returns None.
+    // TODO errors
+    pub(crate) fn get_kw_arg_opt_typed<'a, T>(&'a self, label: &str, ty: &Type, mem: &mut ProgramMemory) -> Option<T>
+    where
+        T: Typed,
+    {
+        let val = &self.kw_args.labeled.get(label)?.value;
+
+        T::checked(val, ty, mem).ok()
     }
 
     /// Get a keyword argument. If not set, returns Err.
@@ -702,7 +714,7 @@ impl<'a> FromKclValue<'a> for [f64; 2] {
         }
         let v0 = value.first()?;
         let v1 = value.get(1)?;
-        let array = [v0.as_f64()?, v1.as_f64()?];
+        let array = [v0.as_f64_untyped()?, v1.as_f64_untyped()?];
         Some(array)
     }
 }
@@ -734,7 +746,7 @@ impl<'a> FromKclValue<'a> for [f64; 3] {
         let v0 = value.first()?;
         let v1 = value.get(1)?;
         let v2 = value.get(2)?;
-        let array = [v0.as_f64()?, v1.as_f64()?, v2.as_f64()?];
+        let array = [v0.as_f64_untyped()?, v1.as_f64_untyped()?, v2.as_f64_untyped()?];
         Some(array)
     }
 }
@@ -1098,7 +1110,7 @@ impl<'a> FromKclValue<'a> for super::helix::HelixData {
         let_field_of!(obj, radius);
         let_field_of!(obj, axis);
         let ccw = ccw.unwrap_or_default();
-        let angle_start = obj.get("angleStart")?.as_f64()?;
+        let angle_start = obj.get("angleStart")?.as_f64_untyped()?;
         Some(Self {
             revolutions,
             angle_start,
@@ -1117,7 +1129,7 @@ impl<'a> FromKclValue<'a> for super::helix::HelixRevolutionsData {
         let_field_of!(obj, length?);
         let_field_of!(obj, ccw?);
         let ccw = ccw.unwrap_or_default();
-        let angle_start = obj.get("angleStart")?.as_f64()?;
+        let angle_start = obj.get("angleStart")?.as_f64_untyped()?;
         Some(Self {
             revolutions,
             angle_start,
@@ -1153,7 +1165,13 @@ impl<'a> FromKclValue<'a> for super::sketch::AngledLineToData {
         };
         // Deserialize from an [angle, to] array.
         let case2 = || {
-            let [angle, to] = arg.as_point2d()?;
+            let arr = arg.as_array()?;
+            if arr.len() != 2 {
+                return None;
+            }
+            let angle = arr[0].as_f64_untyped()?;
+            let to = arr[1].as_f64_untyped()?;
+
             Some(Self { angle, to })
         };
         case1().or_else(case2)
@@ -1165,8 +1183,8 @@ impl<'a> FromKclValue<'a> for super::sketch::ArcData {
         let obj = arg.as_object()?;
         let_field_of!(obj, radius);
         let case1 = || {
-            let angle_start = obj.get("angleStart")?.as_f64()?;
-            let angle_end = obj.get("angleEnd")?.as_f64()?;
+            let angle_start = obj.get("angleStart")?.as_f64_untyped()?;
+            let angle_end = obj.get("angleEnd")?.as_f64_untyped()?;
             Some(Self::AnglesAndRadius {
                 angle_start,
                 angle_end,
@@ -1195,8 +1213,8 @@ impl<'a> FromKclValue<'a> for super::sketch::ArcToData {
 impl<'a> FromKclValue<'a> for super::revolve::RevolveData {
     fn from_kcl_val(arg: &'a KclValue) -> Option<Self> {
         let obj = arg.as_object()?;
-        let angle = obj.get("angle").and_then(|x| x.as_f64());
-        let tolerance = obj.get("tolerance").and_then(|x| x.as_f64());
+        let angle = obj.get("angle").and_then(|x| x.as_f64_untyped());
+        let tolerance = obj.get("tolerance").and_then(|x| x.as_f64_untyped());
         let_field_of!(obj, axis);
         Some(Self { angle, axis, tolerance })
     }
@@ -1522,21 +1540,11 @@ impl<'a> FromKclValue<'a> for super::sketch::AngledLineData {
         };
         let case2 = |arg: &KclValue| {
             let array = arg.as_array()?;
-            let ang = array.first()?.as_f64()?;
-            let len = array.get(1)?.as_f64()?;
+            let ang = array.first()?.as_f64_untyped()?;
+            let len = array.get(1)?.as_f64_untyped()?;
             Some(Self::AngleAndLengthPair([ang, len]))
         };
         case1(arg).or_else(|| case2(arg))
-    }
-}
-
-impl<'a> FromKclValue<'a> for i64 {
-    fn from_kcl_val(arg: &'a KclValue) -> Option<Self> {
-        match arg {
-            KclValue::Number { value, meta: _ } => crate::try_f64_to_i64(*value),
-            KclValue::Int { value, meta: _ } => Some(*value),
-            _ => None,
-        }
     }
 }
 
@@ -1567,40 +1575,6 @@ impl<'a> FromKclValue<'a> for uuid::Uuid {
     }
 }
 
-impl<'a> FromKclValue<'a> for u32 {
-    fn from_kcl_val(arg: &'a KclValue) -> Option<Self> {
-        match arg {
-            KclValue::Number { value, meta: _ } => crate::try_f64_to_u32(*value),
-            KclValue::Int { value, meta: _ } => Some(*value as u32),
-            _ => None,
-        }
-    }
-}
-
-impl<'a> FromKclValue<'a> for NonZeroU32 {
-    fn from_kcl_val(arg: &'a KclValue) -> Option<Self> {
-        u32::from_kcl_val(arg).and_then(|x| x.try_into().ok())
-    }
-}
-
-impl<'a> FromKclValue<'a> for u64 {
-    fn from_kcl_val(arg: &'a KclValue) -> Option<Self> {
-        match arg {
-            KclValue::Number { value, meta: _ } => crate::try_f64_to_u64(*value),
-            KclValue::Int { value, meta: _ } => Some(*value as u64),
-            _ => None,
-        }
-    }
-}
-impl<'a> FromKclValue<'a> for f64 {
-    fn from_kcl_val(arg: &'a KclValue) -> Option<Self> {
-        match arg {
-            KclValue::Number { value, meta: _ } => Some(*value),
-            KclValue::Int { value, meta: _ } => Some(*value as f64),
-            _ => None,
-        }
-    }
-}
 impl<'a> FromKclValue<'a> for Sketch {
     fn from_kcl_val(arg: &'a KclValue) -> Option<Self> {
         let KclValue::Sketch { value } = arg else {
@@ -1656,7 +1630,7 @@ impl<'a> FromKclValue<'a> for SketchSet {
     fn from_kcl_val(arg: &'a KclValue) -> Option<Self> {
         match arg {
             KclValue::Sketch { value: sketch } => Some(SketchSet::from(sketch.to_owned())),
-            KclValue::Sketches { value } => Some(SketchSet::from(value.to_owned())),
+            KclValue::Sketches { value, .. } => Some(SketchSet::from(value.to_owned())),
             KclValue::Array { .. } => {
                 let v: Option<Vec<Sketch>> = FromKclValue::from_kcl_val(arg);
                 Some(SketchSet::Sketches(v?.iter().cloned().map(Box::new).collect()))
