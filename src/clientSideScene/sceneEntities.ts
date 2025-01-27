@@ -2470,9 +2470,9 @@ function prepareTruncatedMemoryAndAst(
     body: [structuredClone(_ast.body[bodyIndex])],
   }
 
-  // Grab all the TagDeclarators and TagIdentifiers from memory.
+  // Ignore anything in memory declared later than the sketch.
   let start = _node.node.start
-  const programMemoryOverride = programMemory.filterVariables(true, (value) => {
+  const programMemoryOverride = programMemory.filterVariables((value) => {
     if (
       !('__meta' in value) ||
       value.__meta === undefined ||
@@ -2482,12 +2482,15 @@ function prepareTruncatedMemoryAndAst(
       return false
     }
 
-    if (value.__meta[0].sourceRange[0] >= start) {
+    if (
+      value.__meta[0].sourceRange[0] == 0 &&
+      value.__meta[0].sourceRange[0] >= start
+    ) {
       // We only want things before our start point.
       return false
     }
 
-    return value.type === 'TagIdentifier'
+    return true
   })
   if (err(programMemoryOverride)) return programMemoryOverride
 
