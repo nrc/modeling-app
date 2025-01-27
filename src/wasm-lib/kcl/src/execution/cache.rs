@@ -1,26 +1,46 @@
 //! Functions for helping with caching an ast and finding the parts the changed.
 
-use serde::{Deserialize, Serialize};
+use std::sync::Arc;
+
+use tokio::sync::RwLock;
 
 use crate::{
-    execution::ExecState,
+    execution::{ExecState, ExecutorSettings},
     parsing::ast::types::{Node, Program},
     walk::Node as WalkNode,
 };
 
-use super::ExecutorSettings;
+lazy_static::lazy_static! {
+    /// A static mutable lock for updating the last successful execution state for the cache.
+    static ref OLD_AST_MEMORY: Arc<RwLock<Option<OldAstState>>> = Default::default();
+}
+
+/// Read the old ast memory from the lock.
+pub(super) async fn read_old_ast_memory() -> Option<OldAstState> {
+    let old_ast = OLD_AST_MEMORY.read().await;
+    old_ast.clone()
+}
+
+pub(super) async fn write_old_ast_memory(old_state: OldAstState) {
+    let mut old_ast = OLD_AST_MEMORY.write().await;
+    *old_ast = Some(old_state);
+}
+
+pub async fn bust_cache() {
+    let mut old_ast = OLD_AST_MEMORY.write().await;
+    // Set the cache to None.
+    *old_ast = None;
+}
 
 /// Information for the caching an AST and smartly re-executing it if we can.
-#[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct CacheInformation {
-    /// The old information.
-    pub old: Option<OldAstState>,
-    /// The new ast to executed.
-    pub new_ast: Node<Program>,
+#[derive(Debug, Clone)]
+pub struct CacheInformation<'a> {
+    pub ast: &'a Node<Program>,
+    pub settings: &'a ExecutorSettings,
 }
 
 /// The old ast and program memory.
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone)]
 pub struct OldAstState {
     /// The ast.
     pub ast: Node<Program>,
@@ -30,17 +50,8 @@ pub struct OldAstState {
     pub settings: crate::execution::ExecutorSettings,
 }
 
-impl From<crate::Program> for CacheInformation {
-    fn from(program: crate::Program) -> Self {
-        CacheInformation {
-            old: None,
-            new_ast: program.ast,
-        }
-    }
-}
-
 /// The result of a cache check.
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 #[allow(clippy::large_enum_variant)]
 pub(super) enum CacheResult {
     ReExecute {
@@ -60,23 +71,15 @@ pub(super) enum CacheResult {
 ///
 /// Returns `None` when there are no changes to the program, i.e. it is
 /// fully cached.
-pub(super) async fn get_changed_program(info: CacheInformation, settings: &ExecutorSettings) -> CacheResult {
-    let Some(old) = info.old else {
-        // We have no old info, we need to re-execute the whole thing.
-        return CacheResult::ReExecute {
-            clear_scene: true,
-            program: info.new_ast,
-        };
-    };
-
+pub(super) async fn get_changed_program(old: CacheInformation<'_>, new: CacheInformation<'_>) -> CacheResult {
     // If the settings are different we might need to bust the cache.
     // We specifically do this before checking if they are the exact same.
-    if &old.settings != settings {
+    if old.settings != new.settings {
         // If the units are different we need to re-execute the whole thing.
-        if old.settings.units != settings.units {
+        if old.settings.units != new.settings.units {
             return CacheResult::ReExecute {
                 clear_scene: true,
-                program: info.new_ast,
+                program: new.ast.clone(),
             };
         }
 
@@ -87,12 +90,13 @@ pub(super) async fn get_changed_program(info: CacheInformation, settings: &Execu
 
     // If the ASTs are the EXACT same we return None.
     // We don't even need to waste time computing the digests.
-    if old.ast == info.new_ast {
+    if old.ast == new.ast {
         return CacheResult::NoAction;
     }
 
-    let mut old_ast = old.ast;
-    let mut new_ast = info.new_ast;
+    // We have to clone just because the digests are stored inline :-(
+    let mut old_ast = old.ast.clone();
+    let mut new_ast = new.ast.clone();
 
     // The digests should already be computed, but just in case we don't
     // want to compare against none.
@@ -112,10 +116,7 @@ pub(super) async fn get_changed_program(info: CacheInformation, settings: &Execu
 /// way in which this gets invoked should always be through
 /// [get_changed_program]. This is purely to contain the logic on
 /// how we construct a new [CacheResult].
-fn generate_changed_program(old_ast: Node<Program>, new_ast: Node<Program>) -> CacheResult {
-    let mut generated_program = new_ast.clone();
-    generated_program.body = vec![];
-
+fn generate_changed_program(old_ast: Node<Program>, mut new_ast: Node<Program>) -> CacheResult {
     if !old_ast.body.iter().zip(new_ast.body.iter()).all(|(old, new)| {
         let old_node: WalkNode = old.into();
         let new_node: WalkNode = new.into();
@@ -158,13 +159,11 @@ fn generate_changed_program(old_ast: Node<Program>, new_ast: Node<Program>) -> C
             // Statements up until now are the same, which means this
             // is a "pure addition" of the remaining slice.
 
-            generated_program
-                .body
-                .extend_from_slice(&new_ast.body[old_ast.body.len()..]);
+            new_ast.body = new_ast.body[new_ast.body.len()..].to_owned();
 
             CacheResult::ReExecute {
                 clear_scene: false,
-                program: generated_program,
+                program: new_ast,
             }
         }
         std::cmp::Ordering::Equal => {
@@ -177,9 +176,11 @@ fn generate_changed_program(old_ast: Node<Program>, new_ast: Node<Program>) -> C
             // so but i think many things. This def needs to change
             // when the code above changes.
 
+            new_ast.body = vec![];
+
             CacheResult::ReExecute {
                 clear_scene: false,
-                program: generated_program,
+                program: new_ast,
             }
         }
     }
@@ -187,44 +188,8 @@ fn generate_changed_program(old_ast: Node<Program>, new_ast: Node<Program>) -> C
 
 #[cfg(test)]
 mod tests {
-    use crate::execution::parse_execute;
-
     use super::*;
-
-    // Easy case where we have no old ast and memory.
-    // We need to re-execute everything.
-    #[tokio::test(flavor = "multi_thread")]
-    async fn test_get_changed_program_no_old_information() {
-        let new = r#"// Remove the end face for the extrusion.
-firstSketch = startSketchOn('XY')
-  |> startProfileAt([-12, 12], %)
-  |> line([24, 0], %)
-  |> line([0, -24], %)
-  |> line([-24, 0], %)
-  |> close(%)
-  |> extrude(6, %)
-
-// Remove the end face for the extrusion.
-shell({ faces = ['end'], thickness = 0.25 }, firstSketch)"#;
-        let (program, ctx, _) = parse_execute(new).await.unwrap();
-
-        let result = get_changed_program(
-            CacheInformation {
-                old: None,
-                new_ast: program.ast.clone(),
-            },
-            &ctx.settings,
-        )
-        .await;
-
-        assert_eq!(
-            result,
-            CacheResult::ReExecute {
-                clear_scene: true,
-                program: program.ast
-            }
-        );
-    }
+    use crate::execution::parse_execute;
 
     #[tokio::test(flavor = "multi_thread")]
     async fn test_get_changed_program_same_code() {
@@ -240,18 +205,17 @@ firstSketch = startSketchOn('XY')
 // Remove the end face for the extrusion.
 shell({ faces = ['end'], thickness = 0.25 }, firstSketch)"#;
 
-        let (program, ctx, exec_state) = parse_execute(new).await.unwrap();
+        let (program, ctx, _) = parse_execute(new).await.unwrap();
 
         let result = get_changed_program(
             CacheInformation {
-                old: Some(OldAstState {
-                    ast: program.ast.clone(),
-                    exec_state,
-                    settings: Default::default(),
-                }),
-                new_ast: program.ast.clone(),
+                ast: &program.ast,
+                settings: &ctx.settings,
             },
-            &ctx.settings,
+            CacheInformation {
+                ast: &program.ast,
+                settings: &ctx.settings,
+            },
         )
         .await;
 
@@ -284,20 +248,19 @@ firstSketch = startSketchOn('XY')
 // Remove the end face for the extrusion.
 shell({ faces = ['end'], thickness = 0.25 }, firstSketch)"#;
 
-        let (program_old, ctx, exec_state) = parse_execute(old).await.unwrap();
+        let (program_old, ctx, _) = parse_execute(old).await.unwrap();
 
         let program_new = crate::Program::parse_no_errs(new).unwrap();
 
         let result = get_changed_program(
             CacheInformation {
-                old: Some(OldAstState {
-                    ast: program_old.ast.clone(),
-                    exec_state,
-                    settings: Default::default(),
-                }),
-                new_ast: program_new.ast.clone(),
+                ast: &program_old.ast,
+                settings: &ctx.settings,
             },
-            &ctx.settings,
+            CacheInformation {
+                ast: &program_new.ast,
+                settings: &ctx.settings,
+            },
         )
         .await;
 
@@ -330,20 +293,19 @@ firstSketch = startSketchOn('XY')
 // Remove the end face for the extrusion.
 shell({ faces = ['end'], thickness = 0.25 }, firstSketch)"#;
 
-        let (program, ctx, exec_state) = parse_execute(old).await.unwrap();
+        let (program, ctx, _) = parse_execute(old).await.unwrap();
 
         let program_new = crate::Program::parse_no_errs(new).unwrap();
 
         let result = get_changed_program(
             CacheInformation {
-                old: Some(OldAstState {
-                    ast: program.ast.clone(),
-                    exec_state,
-                    settings: Default::default(),
-                }),
-                new_ast: program_new.ast.clone(),
+                ast: &program.ast,
+                settings: &ctx.settings,
             },
-            &ctx.settings,
+            CacheInformation {
+                ast: &program_new.ast,
+                settings: &ctx.settings,
+            },
         )
         .await;
 
@@ -376,20 +338,19 @@ firstSketch = startSketchOn('XY')
 // Remove the end face for the extrusion.
 shell({ faces = ['end'], thickness = 0.25 }, firstSketch)"#;
 
-        let (program, ctx, exec_state) = parse_execute(old).await.unwrap();
+        let (program, ctx, _) = parse_execute(old).await.unwrap();
 
         let program_new = crate::Program::parse_no_errs(new).unwrap();
 
         let result = get_changed_program(
             CacheInformation {
-                old: Some(OldAstState {
-                    ast: program.ast.clone(),
-                    exec_state,
-                    settings: Default::default(),
-                }),
-                new_ast: program_new.ast.clone(),
+                ast: &program.ast,
+                settings: &ctx.settings,
             },
-            &ctx.settings,
+            CacheInformation {
+                ast: &program_new.ast,
+                settings: &ctx.settings,
+            },
         )
         .await;
 
@@ -411,21 +372,20 @@ firstSketch = startSketchOn('XY')
 // Remove the end face for the extrusion.
 shell({ faces = ['end'], thickness = 0.25 }, firstSketch)"#;
 
-        let (program, mut ctx, exec_state) = parse_execute(new).await.unwrap();
+        let (program, mut ctx, _) = parse_execute(new).await.unwrap();
 
         // Change the settings to cm.
         ctx.settings.units = crate::UnitLength::Cm;
 
         let result = get_changed_program(
             CacheInformation {
-                old: Some(OldAstState {
-                    ast: program.ast.clone(),
-                    exec_state,
-                    settings: Default::default(),
-                }),
-                new_ast: program.ast.clone(),
+                ast: &program.ast,
+                settings: &Default::default(),
             },
-            &ctx.settings,
+            CacheInformation {
+                ast: &program.ast,
+                settings: &ctx.settings,
+            },
         )
         .await;
 
@@ -453,21 +413,20 @@ firstSketch = startSketchOn('XY')
 // Remove the end face for the extrusion.
 shell({ faces = ['end'], thickness = 0.25 }, firstSketch)"#;
 
-        let (program, mut ctx, exec_state) = parse_execute(new).await.unwrap();
+        let (program, mut ctx, _) = parse_execute(new).await.unwrap();
 
         // Change the settings.
         ctx.settings.show_grid = !ctx.settings.show_grid;
 
         let result = get_changed_program(
             CacheInformation {
-                old: Some(OldAstState {
-                    ast: program.ast.clone(),
-                    exec_state,
-                    settings: Default::default(),
-                }),
-                new_ast: program.ast.clone(),
+                ast: &program.ast,
+                settings: &Default::default(),
             },
-            &ctx.settings,
+            CacheInformation {
+                ast: &program.ast,
+                settings: &ctx.settings,
+            },
         )
         .await;
 
@@ -489,21 +448,20 @@ firstSketch = startSketchOn('XY')
 // Remove the end face for the extrusion.
 shell({ faces = ['end'], thickness = 0.25 }, firstSketch)"#;
 
-        let (program, mut ctx, exec_state) = parse_execute(new).await.unwrap();
+        let (program, mut ctx, _) = parse_execute(new).await.unwrap();
 
         // Change the settings.
         ctx.settings.highlight_edges = !ctx.settings.highlight_edges;
 
         let result = get_changed_program(
             CacheInformation {
-                old: Some(OldAstState {
-                    ast: program.ast.clone(),
-                    exec_state,
-                    settings: Default::default(),
-                }),
-                new_ast: program.ast.clone(),
+                ast: &program.ast,
+                settings: &Default::default(),
             },
-            &ctx.settings,
+            CacheInformation {
+                ast: &program.ast,
+                settings: &ctx.settings,
+            },
         )
         .await;
 
