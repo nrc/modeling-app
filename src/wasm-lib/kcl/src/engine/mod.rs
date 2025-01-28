@@ -114,24 +114,25 @@ pub trait EngineManager: std::fmt::Debug + Send + Sync + 'static {
         id_generator: &mut IdGenerator,
         source_range: SourceRange,
     ) -> Result<(), crate::errors::KclError> {
+        eprintln!("a");
         self.batch_modeling_cmd(
             uuid::Uuid::new_v4(),
             source_range,
             &ModelingCmd::SceneClearAll(mcmd::SceneClearAll::default()),
         )
         .await?;
-
+    eprintln!("b");
         // Flush the batch queue, so clear is run right away.
         // Otherwise the hooks below won't work.
         self.flush_batch(false, source_range).await?;
-
+        eprintln!("c");
         // Ensure artifact commands are cleared so that we don't accumulate them
         // across runs.
         self.clear_artifact_commands();
-
+        eprintln!("d");
         // Do the after clear scene hook.
         self.clear_scene_post_hook(id_generator, source_range).await?;
-
+        eprintln!("e");
         Ok(())
     }
 
@@ -257,11 +258,14 @@ pub trait EngineManager: std::fmt::Debug + Send + Sync + 'static {
             requests.extend(self.batch_end().lock().unwrap().values().cloned());
             requests
         } else {
+            eprintln!("pre lock");
             self.batch().lock().unwrap().clone()
         };
+        eprintln!("aa");
 
         // Return early if we have no commands to send.
         if all_requests.is_empty() {
+            eprintln!("empty");
             return Ok(OkWebSocketResponseData::Modeling {
                 modeling_response: OkModelingCmdResponse::Empty {},
             });
@@ -308,6 +312,7 @@ pub trait EngineManager: std::fmt::Debug + Send + Sync + 'static {
             }
         }
 
+        eprintln!("dd");
         // Throw away the old batch queue.
         self.batch().lock().unwrap().clear();
         if batch_end {
@@ -321,11 +326,13 @@ pub trait EngineManager: std::fmt::Debug + Send + Sync + 'static {
                 batch_id,
                 responses: _,
             }) => {
+                eprintln!("e1");
                 // Get the last command ID.
                 let last_id = requests.last().unwrap().cmd_id;
                 let ws_resp = self
                     .inner_send_modeling_cmd(batch_id.into(), source_range, final_req, id_to_source_range.clone())
                     .await?;
+                eprintln!("1done");
                 let response = self.parse_websocket_response(ws_resp, source_range)?;
 
                 // If we have a batch response, we want to return the specific id we care about.
@@ -341,6 +348,7 @@ pub trait EngineManager: std::fmt::Debug + Send + Sync + 'static {
                 }
             }
             WebSocketRequest::ModelingCmdReq(ModelingCmdReq { cmd: _, cmd_id }) => {
+                eprintln!("e2");
                 // You are probably wondering why we can't just return the source range we were
                 // passed with the function. Well this is actually really important.
                 // If this is the last command in the batch and there is only one and we've reached
@@ -357,6 +365,7 @@ pub trait EngineManager: std::fmt::Debug + Send + Sync + 'static {
                 let ws_resp = self
                     .inner_send_modeling_cmd(cmd_id.into(), source_range, final_req, id_to_source_range)
                     .await?;
+                eprintln!("2done");
                 self.parse_websocket_response(ws_resp, source_range)
             }
             _ => Err(KclError::Engine(KclErrorDetails {

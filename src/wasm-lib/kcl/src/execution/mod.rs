@@ -471,11 +471,7 @@ impl ExecutorContext {
     ) -> Result<(), KclError> {
         self.engine
             .clear_scene(&mut exec_state.global.id_generator, source_range)
-            .await?;
-
-        // We do not create the planes here as the post hook in wasm will do that
-        // AND if we aren't in wasm it doesn't really matter.
-        Ok(())
+            .await
     }
 
     pub async fn run_with_caching(
@@ -485,7 +481,7 @@ impl ExecutorContext {
     ) -> Result<ExecOutcome, KclError> {
         assert!(self.is_mock() || program_memory_override.is_none());
 
-        let (program, mut exec_state) = if !self.is_mock() {
+        let (program, mut exec_state) = if self.is_mock() {
             let mut exec_state = ExecState::new(&self.settings);
             if let Some(program_memory_override) = program_memory_override {
                 exec_state.mod_local.memory = program_memory_override;
@@ -541,10 +537,17 @@ impl ExecutorContext {
 
             (program, exec_state)
         } else {
-            (program.ast, ExecState::new(&self.settings))
+            eprintln!("clear");
+            let mut exec_state = ExecState::new(&self.settings);
+            self.send_clear_scene(&mut exec_state, Default::default())
+                .await
+                .map_err(KclErrorWithOutputs::no_outputs)?;
+            (program.ast, exec_state)
         };
 
+        eprintln!("ready");
         let result = self.inner_run(&program, &mut exec_state).await;
+        eprintln!("ran");
 
         if result.is_err() && !self.is_mock() {
             cache::bust_cache().await;
@@ -555,6 +558,7 @@ impl ExecutorContext {
 
         // If we aren't in mock mode, save this as the last successful execution to the cache.
         if !self.is_mock() {
+            eprintln!("pre write");
             cache::write_old_ast_memory(OldAstState {
                 ast: program,
                 exec_state: exec_state.clone(),
@@ -570,9 +574,8 @@ impl ExecutorContext {
     ///
     /// You can optionally pass in some initialization memory for partial
     /// execution.
-    pub async fn run(&self, program: &crate::Program, exec_state: &mut ExecState) -> Result<(), KclError> {
-        self.inner_run(&program.ast, exec_state).await?;
-        Ok(())
+    pub async fn run(&self, program: &crate::Program, exec_state: &mut ExecState) -> Result<Option<ModelingSessionData>, KclError> {
+        self.run_with_ui_outputs(program, exec_state).await.map_err(|e| e.into())
     }
 
     /// Perform the execution of a program.
@@ -586,19 +589,11 @@ impl ExecutorContext {
         &self,
         program: &crate::Program,
         exec_state: &mut ExecState,
-    ) -> Result<(), KclErrorWithOutputs> {
-        self.inner_run(&program.ast, exec_state).await?;
-        Ok(())
-    }
-
-    /// Perform the execution of a program.  Additionally return engine session
-    /// data.
-    pub async fn run_with_session_data(
-        &self,
-        program: &crate::Program,
-        exec_state: &mut ExecState,
-    ) -> Result<Option<ModelingSessionData>, KclError> {
-        self.inner_run(&program.ast, exec_state).await.map_err(|e| e.into())
+    ) -> Result<Option<ModelingSessionData>, KclErrorWithOutputs> {
+        self.send_clear_scene(exec_state, Default::default())
+            .await
+            .map_err(KclErrorWithOutputs::no_outputs)?;
+        self.inner_run(&program.ast, exec_state).await
     }
 
     /// Perform the execution of a program.  Accept all possible parameters and
@@ -1537,8 +1532,10 @@ let w = f() + f()
             .await
             .unwrap();
         let old_program = crate::Program::parse_no_errs(code).unwrap();
+        eprintln!("0");
         // Execute the program.
         ctx.run_with_caching(old_program, None).await.unwrap();
+        eprintln!("1");
 
         // Get the id_generator from the first execution.
         let id_generator = cache::read_old_ast_memory()
@@ -1547,6 +1544,7 @@ let w = f() + f()
             .exec_state
             .global
             .id_generator;
+        eprintln!("2");
 
         let code = r#"sketch001 = startSketchOn('XZ')
 |> startProfileAt([62.74, 206.13], %)
@@ -1566,6 +1564,7 @@ let w = f() + f()
         let program = crate::Program::parse_no_errs(code).unwrap();
         // Execute the program.
         ctx.run_with_caching(program, None).await.unwrap();
+        eprintln!("3");
 
         let new_id_generator = cache::read_old_ast_memory()
             .await
@@ -1573,6 +1572,7 @@ let w = f() + f()
             .exec_state
             .global
             .id_generator;
+        eprintln!("4");
         assert_eq!(id_generator, new_id_generator);
     }
 }

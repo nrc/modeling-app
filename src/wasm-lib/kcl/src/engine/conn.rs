@@ -492,7 +492,7 @@ impl EngineManager for EngineConnection {
 
         // Wait for the response.
         let current_time = std::time::Instant::now();
-        while current_time.elapsed().as_secs() < 60 {
+        while current_time.elapsed().as_secs() < 6 {
             if let Ok(guard) = self.socket_health.lock() {
                 if *guard == SocketHealth::Inactive {
                     // Check if we have any pending errors.

@@ -17,17 +17,23 @@ lazy_static::lazy_static! {
 
 /// Read the old ast memory from the lock.
 pub(super) async fn read_old_ast_memory() -> Option<OldAstState> {
+    eprintln!("read_old_ast_memory");
     let old_ast = OLD_AST_MEMORY.read().await;
+    eprintln!("ok");
     old_ast.clone()
 }
 
 pub(super) async fn write_old_ast_memory(old_state: OldAstState) {
+    eprintln!("write_old_ast_memory");
     let mut old_ast = OLD_AST_MEMORY.write().await;
+    eprintln!("ok");
     *old_ast = Some(old_state);
 }
 
 pub async fn bust_cache() {
+    eprintln!("bust_cache");
     let mut old_ast = OLD_AST_MEMORY.write().await;
+    eprintln!("ok");
     // Set the cache to None.
     *old_ast = None;
 }
